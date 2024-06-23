@@ -12,16 +12,20 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
+import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 import io.helidon.webserver.staticcontent.StaticContentService;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidatorFactory;
 
 public class Main {
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
   private Main() {
+    throw new IllegalStateException();
   }
 
   public static void main(String[] args) {
@@ -31,20 +35,20 @@ public class Main {
     Config.global(config);
 
     Config dbConfig = config.get("db");
-    DbClient dbClient = DbClient.create(dbConfig);
-    Contexts.globalContext().register(dbClient);
+    registerDbClient(dbConfig);
+    runFlywayMigration(dbConfig);
 
-    Flyway flyway = Flyway.configure().dataSource(createDatasource(dbConfig)).load();
-    flyway.migrate();
+    registerValidator();
+    registerRepositories();
 
     WebServer.builder()
         .config(config.get("server"))
-        .routing(Main::routing)
+        .routing(Main::configureRouting)
         .build()
         .start();
   }
 
-  static void routing(HttpRouting.Builder routing) {
+  static void configureRouting(HttpRouting.Builder routing) {
     routing
         .register("/api/v1", new UserService())
         .register("/", StaticContentService.builder("/web")
@@ -62,5 +66,25 @@ public class Main {
     hikariConfig.setConnectionTimeout(dbConfig.get("pool.connection-timeout").asLong().get());
 
     return new HikariDataSource(hikariConfig);
+  }
+
+  private static void registerDbClient(Config dbConfig) {
+    DbClient dbClient = DbClient.create(dbConfig);
+    Contexts.globalContext().register(dbClient);
+  }
+
+  private static void registerRepositories() {
+    Contexts.globalContext().register(new UserRepository());
+  }
+
+  private static void registerValidator() {
+    try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+      Contexts.globalContext().register(factory.getValidator());
+    }
+  }
+
+  private static void runFlywayMigration(Config dbConfig) {
+    Flyway flyway = Flyway.configure().dataSource(createDatasource(dbConfig)).load();
+    flyway.migrate();
   }
 }

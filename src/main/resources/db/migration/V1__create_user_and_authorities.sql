@@ -2,7 +2,6 @@ CREATE TABLE users
 (
     id            SERIAL PRIMARY KEY,
     email         VARCHAR(255) NOT NULL UNIQUE,
-    password_hash CHAR(60)     NOT NULL,
     name          VARCHAR(255) NOT NULL,
     created_at    TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
