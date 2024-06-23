@@ -9,7 +9,6 @@ import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
 import io.helidon.webserver.http.ServerRequest;
 import io.helidon.webserver.http.ServerResponse;
-
 import jakarta.json.Json;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
@@ -29,13 +28,7 @@ import jakarta.json.JsonObject;
  * The message is returned as a JSON object
  */
 class GreetService implements HttpService {
-
-
     private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
-
-    /**
-     * The config value for the key {@code greeting}.
-     */
     private final AtomicReference<String> greeting = new AtomicReference<>();
 
     GreetService() {
