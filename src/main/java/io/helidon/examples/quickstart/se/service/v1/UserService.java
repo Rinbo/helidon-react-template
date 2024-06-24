@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Contexts;
+import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.http.Status;
@@ -16,7 +17,6 @@ import io.helidon.webserver.http.ServerRequest;
 import io.helidon.webserver.http.ServerResponse;
 import jakarta.json.Json;
 import jakarta.json.JsonBuilderFactory;
-import jakarta.json.JsonObject;
 
 public class UserService implements HttpService {
   private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
@@ -52,7 +52,7 @@ public class UserService implements HttpService {
    * @param response a list of users
    */
   private void getUsers(ServerRequest request, ServerResponse response) {
-    List<JsonObject> users = userRepository.findAll();
+    List<User> users = userRepository.findAll();
     response.send(users);
   }
 }

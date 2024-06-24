@@ -14,10 +14,14 @@ import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
+import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 import io.helidon.webserver.staticcontent.StaticContentService;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 
@@ -51,9 +55,8 @@ public class Main {
   static void configureRouting(HttpRouting.Builder routing) {
     routing
         .register("/api/v1", new UserService())
-        .register("/", StaticContentService.builder("/web")
-            .welcomeFileName("index.html")
-            .build());
+        .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
+        .error(ConstraintViolationException.class, Main::handleError);
   }
 
   private static DataSource createDatasource(Config dbConfig) {
@@ -66,6 +69,11 @@ public class Main {
     hikariConfig.setConnectionTimeout(dbConfig.get("pool.connection-timeout").asLong().get());
 
     return new HikariDataSource(hikariConfig);
+  }
+
+  private static void handleError(ServerRequest req, ServerResponse res, ConstraintViolationException ex) {
+    res.status(Status.BAD_REQUEST_400);
+    res.send("Unable to parse request. Message: " + ex.getMessage());
   }
 
   private static void registerDbClient(Config dbConfig) {

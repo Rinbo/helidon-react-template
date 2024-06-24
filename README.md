@@ -1,9 +1,16 @@
 # helidon-quickstart-se
 
+# TODO
+- [ ] Batch update (roles)
+- [ ] Unit testing
+- [ ] Integration testing
+- [ ] Pagination (improved version)
+- [ ] Authentication (magic link)
+- [ ] Authorization
+
 Sample Helidon SE project that includes multiple REST operations.
 
 ## Build and run
-
 
 With JDK21
 ```bash
