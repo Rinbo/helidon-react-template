@@ -1,7 +1,7 @@
 # helidon-quickstart-se
 
 # TODO
-- [ ] Batch update (roles)
+- [x] Batch update (roles)
 - [ ] Unit testing
 - [ ] Integration testing
 - [ ] Pagination (improved version)

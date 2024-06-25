@@ -28,86 +28,85 @@ import jakarta.json.JsonObject;
  * The message is returned as a JSON object
  */
 class GreetService implements HttpService {
-    private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
-    private final AtomicReference<String> greeting = new AtomicReference<>();
+  private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
+  private final AtomicReference<String> greeting = new AtomicReference<>();
 
-    GreetService() {
-        this(Config.global().get("app"));
+  GreetService() {
+    this(Config.global().get("app"));
+  }
+
+  GreetService(Config appConfig) {
+    greeting.set(appConfig.get("greeting").asString().orElse("Ciao"));
+  }
+
+  /**
+   * A service registers itself by updating the routing rules.
+   *
+   * @param rules the routing rules.
+   */
+  @Override
+  public void routing(HttpRules rules) {
+    rules
+        .get("/", this::getDefaultMessageHandler)
+        .get("/{name}", this::getMessageHandler)
+        .put("/greeting", this::updateGreetingHandler);
+  }
+
+  /**
+   * Return a worldly greeting message.
+   *
+   * @param request  the server request
+   * @param response the server response
+   */
+  private void getDefaultMessageHandler(ServerRequest request, ServerResponse response) {
+    sendResponse(response, "World");
+  }
+
+  /**
+   * Return a greeting message using the name that was provided.
+   *
+   * @param request  the server request
+   * @param response the server response
+   */
+  private void getMessageHandler(ServerRequest request, ServerResponse response) {
+    String name = request.path().pathParameters().get("name");
+    sendResponse(response, name);
+  }
+
+  private void sendResponse(ServerResponse response, String name) {
+    String msg = String.format("%s %s!", greeting.get(), name);
+
+    JsonObject returnObject = JSON.createObjectBuilder()
+        .add("message", msg)
+        .build();
+    response.send(returnObject);
+  }
+
+  private void updateGreetingFromJson(JsonObject jo, ServerResponse response) {
+
+    if (!jo.containsKey("greeting")) {
+      JsonObject jsonErrorObject = JSON.createObjectBuilder()
+          .add("error", "No greeting provided")
+          .build();
+      response.status(Status.BAD_REQUEST_400)
+          .send(jsonErrorObject);
+
+      return;
     }
 
-    GreetService(Config appConfig) {
-        greeting.set(appConfig.get("greeting").asString().orElse("Ciao"));
-    }
+    greeting.set(jo.getString("greeting"));
+    response.status(Status.NO_CONTENT_204).send();
+  }
 
-    /**
-     * A service registers itself by updating the routing rules.
-     *
-     * @param rules the routing rules.
-     */
-    @Override
-    public void routing(HttpRules rules) {
-        rules
-                .get("/", this::getDefaultMessageHandler)
-                .get("/{name}", this::getMessageHandler)
-                .put("/greeting", this::updateGreetingHandler);
-    }
-
-    /**
-     * Return a worldly greeting message.
-     *
-     * @param request  the server request
-     * @param response the server response
-     */
-    private void getDefaultMessageHandler(ServerRequest request,
-                                          ServerResponse response) {
-        sendResponse(response, "World");
-    }
-
-    /**
-     * Return a greeting message using the name that was provided.
-     *
-     * @param request  the server request
-     * @param response the server response
-     */
-    private void getMessageHandler(ServerRequest request,
-                                   ServerResponse response) {
-        String name = request.path().pathParameters().get("name");
-        sendResponse(response, name);
-    }
-
-    private void sendResponse(ServerResponse response, String name) {
-        String msg = String.format("%s %s!", greeting.get(), name);
-
-        JsonObject returnObject = JSON.createObjectBuilder()
-                .add("message", msg)
-                .build();
-        response.send(returnObject);
-    }
-
-    private void updateGreetingFromJson(JsonObject jo, ServerResponse response) {
-
-        if (!jo.containsKey("greeting")) {
-            JsonObject jsonErrorObject = JSON.createObjectBuilder()
-                    .add("error", "No greeting provided")
-                    .build();
-            response.status(Status.BAD_REQUEST_400)
-                    .send(jsonErrorObject);
-            return;
-        }
-
-        greeting.set(jo.getString("greeting"));
-        response.status(Status.NO_CONTENT_204).send();
-    }
-
-    /**
-     * Set the greeting to use in future messages.
-     *
-     * @param request  the server request
-     * @param response the server response
-     */
-    private void updateGreetingHandler(ServerRequest request,
-                                       ServerResponse response) {
-        updateGreetingFromJson(request.content().as(JsonObject.class), response);
-    }
+  /**
+   * Set the greeting to use in future messages.
+   *
+   * @param request  the server request
+   * @param response the server response
+   */
+  private void updateGreetingHandler(ServerRequest request,
+      ServerResponse response) {
+    updateGreetingFromJson(request.content().as(JsonObject.class), response);
+  }
 
 }

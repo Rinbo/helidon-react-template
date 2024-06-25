@@ -1,5 +1,8 @@
 package io.helidon.examples.quickstart.se.data.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbRow;
+import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.dto.UserForm;
@@ -24,6 +28,23 @@ public class UserRepository {
 
   public UserRepository() {
     dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
+  }
+
+  private static void batchUpdateRoles(int userId, List<Role> roles, DbTransaction transaction) {
+    try (Connection connection = transaction.unwrap(Connection.class)) {
+      PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO authorities (user_id, authority) VALUES (?, ?)");
+
+      for (Role role : roles) {
+        preparedStatement.setInt(1, userId);
+        preparedStatement.setString(2, role.name());
+        preparedStatement.addBatch();
+      }
+
+      preparedStatement.executeBatch();
+
+    } catch (SQLException e) {
+      throw new IllegalStateException("Role update failed", e);
+    }
   }
 
   private static User extractUser(Map.Entry<Integer, List<DbRow>> entry) {
@@ -73,5 +94,26 @@ public class UserRepository {
         .stream()
         .map(UserRepository::extractUser)
         .toList();
+  }
+
+  public void updateUserRoles(int userId, List<Role> roles) {
+    DbTransaction transaction = dbClient.transaction();
+
+    transaction.createDelete("DELETE FROM authorities WHERE user_id = :userId")
+        .addParam("userId", userId)
+        .execute();
+
+    if (!roles.isEmpty()) batchUpdateRoles(userId, roles, transaction);
+
+    /*
+    transaction.createInsert("INSERT INTO authorities (user_id, authority) VALUES (?, ?)")
+          .params(roles.stream()
+              .map(role -> new Object[] {userId, role.name()})
+              .toList())
+          .execute();
+
+     */
+
+    transaction.commit();
   }
 }

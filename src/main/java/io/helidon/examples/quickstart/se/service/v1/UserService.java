@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Contexts;
+import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
@@ -32,6 +33,7 @@ public class UserService implements HttpService {
   public void routing(HttpRules httpRules) {
     httpRules.get("/users", this::getUsers);
     httpRules.post("/users", this::createUser);
+    httpRules.put("/users/{userId}/roles", this::updateUserRoles);
   }
 
   /**
@@ -54,5 +56,18 @@ public class UserService implements HttpService {
   private void getUsers(ServerRequest request, ServerResponse response) {
     List<User> users = userRepository.findAll();
     response.send(users);
+  }
+
+  private void updateUserRoles(ServerRequest request, ServerResponse response) {
+    int userId = Integer.parseInt(request.path().pathParameters().get("userId"));
+    List<?> list = request.content().as(List.class);
+
+    List<Role> roles = list.stream()
+        .map(String.class::cast)
+        .map(Role::valueOf)
+        .toList();
+
+    userRepository.updateUserRoles(userId, roles);
+    response.status(Status.CREATED_201).send();
   }
 }
