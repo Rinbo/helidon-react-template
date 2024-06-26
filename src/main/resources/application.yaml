@@ -15,9 +15,6 @@ db:
     connection-timeout: 3000
     max-pool-size: 10
     min-idle: 2
-#  statements:
-#    ping: "DO 0"
-#    select-all-pokemons: "SELECT id, name FROM Pokemons"
 
 app:
   greeting: "Hello"

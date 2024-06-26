@@ -2,8 +2,8 @@
 
 # TODO
 - [x] Batch update (roles)
-- [ ] Unit testing
-- [ ] Integration testing
+- [x] Unit testing
+- [x] Integration testing
 - [ ] Pagination (improved version)
 - [ ] Authentication (magic link)
 - [ ] Authorization

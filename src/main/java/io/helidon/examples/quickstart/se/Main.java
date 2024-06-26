@@ -36,14 +36,7 @@ public class Main {
     LogConfig.configureRuntime();
 
     Config config = Config.create();
-    Config.global(config);
-
-    Config dbConfig = config.get("db");
-    registerDbClient(dbConfig);
-    runFlywayMigration(dbConfig);
-
-    registerValidator();
-    registerRepositories();
+    setup(config);
 
     WebServer.builder()
         .config(config.get("server"))
@@ -57,6 +50,17 @@ public class Main {
         .register("/api/v1", new UserService())
         .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
         .error(ConstraintViolationException.class, Main::handleError);
+  }
+
+  static void setup(Config config) {
+    Config.global(config);
+
+    Config dbConfig = config.get("db");
+    registerDbClient(dbConfig);
+    runFlywayMigration(dbConfig);
+
+    registerValidator();
+    registerRepositories();
   }
 
   private static DataSource createDatasource(Config dbConfig) {
