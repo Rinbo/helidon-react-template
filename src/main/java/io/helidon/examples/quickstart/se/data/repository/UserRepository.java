@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbRow;
+import io.helidon.dbclient.DbStatementQuery;
 import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
@@ -86,14 +87,16 @@ public class UserRepository {
   }
 
   public List<User> findAll() {
-    return dbClient.execute()
-        .createQuery("SELECT * FROM users JOIN authorities ON users.id = authorities.user_id")
-        .execute()
-        .collect(Collectors.groupingBy(row -> row.column("id").getInt(), HashMap::new, Collectors.toList()))
-        .entrySet()
-        .stream()
-        .map(UserRepository::extractUser)
-        .toList();
+    String sql = "SELECT * FROM users JOIN authorities ON users.id = authorities.user_id ORDER BY id";
+    return multiSelect(dbClient.execute().createQuery(sql));
+  }
+
+  public List<User> findPaginatedUsers(int pageSize, int page) {
+    String sql = "SELECT * FROM (SELECT * FROM users ORDER BY id LIMIT :limit OFFSET :offset) AS l_users LEFT JOIN public.authorities a ON l_users.id = a.user_id ORDER BY id";
+    return multiSelect(dbClient.execute()
+        .createQuery(sql)
+        .addParam("limit", pageSize)
+        .addParam("offset", page * pageSize));
   }
 
   public void updateUserRoles(int userId, List<Role> roles) {
@@ -105,15 +108,16 @@ public class UserRepository {
 
     if (!roles.isEmpty()) batchUpdateRoles(userId, roles, transaction);
 
-    /*
-    transaction.createInsert("INSERT INTO authorities (user_id, authority) VALUES (?, ?)")
-          .params(roles.stream()
-              .map(role -> new Object[] {userId, role.name()})
-              .toList())
-          .execute();
-
-     */
-
     transaction.commit();
+  }
+
+  private List<User> multiSelect(DbStatementQuery query) {
+    return query
+        .execute()
+        .collect(Collectors.groupingBy(row -> row.column("id").getInt(), TreeMap::new, Collectors.toList()))
+        .entrySet()
+        .stream()
+        .map(UserRepository::extractUser)
+        .toList();
   }
 }

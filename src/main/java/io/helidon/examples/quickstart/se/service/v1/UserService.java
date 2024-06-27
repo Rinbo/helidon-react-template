@@ -31,7 +31,7 @@ public class UserService implements HttpService {
 
   @Override
   public void routing(HttpRules httpRules) {
-    httpRules.get("/users", this::getUsers);
+    httpRules.get("/users", this::getPaginatedUsers);
     httpRules.post("/users", this::createUser);
     httpRules.put("/users/{userId}/roles", this::updateUserRoles);
   }
@@ -47,6 +47,14 @@ public class UserService implements HttpService {
     response.status(Status.CREATED_201).send();
   }
 
+  private void getPaginatedUsers(ServerRequest request, ServerResponse response) {
+    int pageSize = request.prologue().query().first("page-size").asInt().orElse(100);
+    int page = request.prologue().query().first("page").asInt().orElse(0);
+
+    List<User> users = userRepository.findPaginatedUsers(pageSize, page);
+    response.send(users);
+  }
+
   /**
    * Get all users.
    *
@@ -54,12 +62,13 @@ public class UserService implements HttpService {
    * @param response a list of users
    */
   private void getUsers(ServerRequest request, ServerResponse response) {
+    System.out.println("I AM HIT USERS");
     List<User> users = userRepository.findAll();
     response.send(users);
   }
 
   private void updateUserRoles(ServerRequest request, ServerResponse response) {
-    int userId = Integer.parseInt(request.path().pathParameters().get("userId"));
+    int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
     List<?> list = request.content().as(List.class);
 
     List<Role> roles = list.stream()

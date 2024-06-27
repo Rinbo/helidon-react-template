@@ -4,7 +4,7 @@
 - [x] Batch update (roles)
 - [x] Unit testing
 - [x] Integration testing
-- [ ] Pagination (improved version)
+- [x] Pagination (improved version)
 - [ ] Authentication (magic link)
 - [ ] Authorization
 
