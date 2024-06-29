@@ -13,6 +13,7 @@ import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
@@ -40,14 +41,28 @@ public class Main {
 
     WebServer.builder()
         .config(config.get("server"))
+
         .routing(Main::configureRouting)
         .build()
         .start();
   }
 
+  static void addAuthFilter(HttpRouting.Builder routing) {
+    routing.addFilter(AuthFilter.create());
+  }
+
   static void configureRouting(HttpRouting.Builder routing) {
     routing
+        .addFilter(AuthFilter.create())
         .register("/api/v1", new UserService())
+        .any("/web/register", (request, response) -> {
+          logger.info("REGISTER ENDPOINT CALLED");
+          response.send("hello from register");
+        })
+        .any("/web/authenticate", (request, response) -> {
+          logger.info("AUTHENTICATE ENDPOINT CALLED");
+          response.send("hello from authenticate");
+        })
         .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
         .error(ConstraintViolationException.class, Main::handleError);
   }

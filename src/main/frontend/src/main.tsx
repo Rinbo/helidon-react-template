@@ -4,8 +4,6 @@ import { createHashRouter, Link, RouterProvider } from "react-router-dom";
 import "./index.css";
 import logo from "./assets/react.svg";
 
-type ResponseType = { users: string };
-
 const router = createHashRouter([
   {
     path: "/",
@@ -27,20 +25,32 @@ function Index() {
   );
 }
 
+type User = { id: number; email: string; name: string; roles: string[] };
+type ResponseType = User[];
+
 function About() {
-  const [response, setResponse] = React.useState<ResponseType>();
+  const [response, setResponse] = React.useState<ResponseType>([]);
 
   React.useEffect(() => {
     fetch("/api/v1/users")
       .then((res) => res.json())
-      .then((data) => setResponse(data));
+      .then((data) => setResponse(data))
+      .catch((e) => console.error(e));
   }, []);
 
-  if (!response) return <div>Loading...</div>;
+  console.log(response, "RESPONSE");
+
   return (
     <div className="flex h-full flex-col items-center justify-center">
       <div className="text-3xl">About</div>
-      <div>Message from server: {response.users}</div>
+      <div className="flex flex-col items-center justify-center gap-3">
+        Message from server:{" "}
+        {response.map((user) => (
+          <pre className="rounded-md bg-cyan-200 p-2">
+            {JSON.stringify(user, null, 2)}
+          </pre>
+        ))}
+      </div>
       <Link className="hover:bg-cyan-400" to="/">
         Home
       </Link>
