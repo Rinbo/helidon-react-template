@@ -6,11 +6,10 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
@@ -23,8 +22,6 @@ import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.examples.quickstart.se.utils.Validate;
 
 public class UserRepository {
-  private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
-
   private final DbClient dbClient;
 
   public UserRepository() {
@@ -48,8 +45,7 @@ public class UserRepository {
     }
   }
 
-  private static User extractUser(Map.Entry<Integer, List<DbRow>> entry) {
-    List<DbRow> rows = entry.getValue();
+  private static User extractUser(List<DbRow> rows) {
     DbRow firstRow = rows.getFirst();
     List<Role> roles = rows.stream()
         .filter(row -> row.column("authority").asOptional().isPresent())
@@ -57,12 +53,16 @@ public class UserRepository {
         .toList();
 
     return new User(
-        entry.getKey(),
+        firstRow.column("id").getInt(),
         firstRow.column("email").getString(),
         firstRow.column("name").getString(),
         firstRow.column("created_at").get(LocalDateTime.class),
         firstRow.column("updated_at").get(LocalDateTime.class),
         roles);
+  }
+
+  private static User extractUser(Map.Entry<Integer, List<DbRow>> entry) {
+    return extractUser(entry.getValue());
   }
 
   public void createUser(UserForm userForm) {
@@ -89,6 +89,32 @@ public class UserRepository {
   public List<User> findAll() {
     String sql = "SELECT * FROM users JOIN authorities ON users.id = authorities.user_id ORDER BY id";
     return multiSelect(dbClient.execute().createQuery(sql));
+  }
+
+  public Optional<User> findByEmail(String email) {
+    Objects.requireNonNull(email, "email cannot be null");
+
+    List<DbRow> rows = dbClient.execute()
+        .createQuery("SELECT * FROM users u LEFT JOIN authorities a ON u.id = a.user_id WHERE u.email = :email")
+        .addParam("email", email)
+        .execute()
+        .toList();
+
+    if (rows.isEmpty()) return Optional.empty();
+
+    return Optional.of(extractUser(rows));
+  }
+
+  public Optional<User> findById(int userId) {
+    List<DbRow> rows = dbClient.execute()
+        .createQuery("SELECT * FROM users u LEFT JOIN authorities a ON u.id = a.user_id WHERE u.id = :id")
+        .addParam("id", userId)
+        .execute()
+        .toList();
+
+    if (rows.isEmpty()) return Optional.empty();
+
+    return Optional.of(extractUser(rows));
   }
 
   public List<User> findPaginatedUsers(int pageSize, int page) {

@@ -9,16 +9,16 @@ import org.slf4j.LoggerFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
+import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
-import io.helidon.examples.quickstart.se.security.AtnProvider;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
-import io.helidon.security.Security;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 import io.helidon.webserver.http.ServerRequest;
@@ -40,11 +40,6 @@ public class Main {
 
     Config config = Config.create();
     setup(config);
-
-    Security security = Security.builder()
-        .config(config)
-        .addProvider(new AtnProvider())
-        .build();
 
     WebServer.builder()
         .config(config.get("server"))
@@ -103,7 +98,9 @@ public class Main {
   }
 
   private static void registerRepositories() {
-    Contexts.globalContext().register(new UserRepository());
+    Context context = Contexts.globalContext();
+    context.register(new UserRepository());
+    context.register(new AuthRepository());
   }
 
   private static void registerValidator() {

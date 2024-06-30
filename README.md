@@ -8,6 +8,13 @@
 - [ ] Authentication (magic link)
 - [ ] Authorization
 
+# AUTH
+- [ ] Add login endpoint where a user can provide their email - add long or short polling and reroute if a valid accessToken is obtained
+- [ ] Add Database schema for inserting a timed login token - loginToken, userId, expiry
+- [ ] Add scheduled job for deleting old login tokens
+- [ ] Add email link authentication route - path param is login token. If it matches in database and not expired we create a jwt and refresh token and set cookie headers
+- [ ] Implement authentication provider, validate token, check refresh cache and refresh flag
+
 - Filter
   - "/", "/register", "/authenticate" -> proceed
   1. Check if there is an entry in cache for refresh token and if refreshing token is required

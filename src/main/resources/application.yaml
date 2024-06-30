@@ -9,7 +9,11 @@ server:
         authenticate: true
       paths:
         - path: "/web/register"
-          methods: [ "get" ]
+          methods: [ "get", "post" ]
+          authenticate: false
+        - path: "/web/login"
+          authenticate: false
+        - path: "/web/authenticate"
           authenticate: false
         - path: "/api/v1/users[/{*}]"
           methods: [ "get", "post", "put" ]
