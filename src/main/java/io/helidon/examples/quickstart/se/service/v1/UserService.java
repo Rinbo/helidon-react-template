@@ -12,6 +12,7 @@ import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.http.Status;
+import io.helidon.security.SecurityContext;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
 import io.helidon.webserver.http.ServerRequest;
@@ -50,6 +51,8 @@ public class UserService implements HttpService {
   private void getPaginatedUsers(ServerRequest request, ServerResponse response) {
     int pageSize = request.prologue().query().first("page-size").asInt().orElse(100);
     int page = request.prologue().query().first("page").asInt().orElse(0);
+
+    SecurityContext context = request.context().get(SecurityContext.class).orElse(null);
 
     List<User> users = userRepository.findPaginatedUsers(pageSize, page);
     response.send(users);

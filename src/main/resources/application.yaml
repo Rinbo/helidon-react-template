@@ -1,9 +1,24 @@
 server:
   port: 8080
-  host: 0.0.0.0
   static:
     classpath:
       location: /web
+  features:
+    security:
+      defaults:
+        authenticate: true
+      paths:
+        - path: "/web/register"
+          methods: [ "get" ]
+          authenticate: false
+        - path: "/api/v1/users[/{*}]"
+          methods: [ "get", "post", "put" ]
+          roles-allowed: [ "user" ]
+
+security:
+  providers:
+    - atn:
+      class: io.helidon.examples.quickstart.se.security.AtnProvider
 
 db:
   source: "jdbc"

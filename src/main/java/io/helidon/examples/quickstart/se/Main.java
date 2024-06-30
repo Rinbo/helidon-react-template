@@ -13,10 +13,12 @@ import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.security.AtnProvider;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
+import io.helidon.security.Security;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 import io.helidon.webserver.http.ServerRequest;
@@ -39,16 +41,16 @@ public class Main {
     Config config = Config.create();
     setup(config);
 
+    Security security = Security.builder()
+        .config(config)
+        .addProvider(new AtnProvider())
+        .build();
+
     WebServer.builder()
         .config(config.get("server"))
-
         .routing(Main::configureRouting)
         .build()
         .start();
-  }
-
-  static void addAuthFilter(HttpRouting.Builder routing) {
-    routing.addFilter(AuthFilter.create());
   }
 
   static void configureRouting(HttpRouting.Builder routing) {
