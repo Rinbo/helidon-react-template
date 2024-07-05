@@ -8,16 +8,16 @@ server:
       defaults:
         authenticate: true
       paths:
-        - path: "/web/register"
+        - path: "/api/register"
           methods: [ "get", "post" ]
           authenticate: false
-        - path: "/web/login"
+        - path: "/api/login"
           authenticate: false
-        - path: "/web/authenticate"
+        - path: "/api/authenticate"
           authenticate: false
         - path: "/api/v1/users[/{*}]"
           methods: [ "get", "post", "put" ]
-          roles-allowed: [ "user" ]
+          roles-allowed: [ "USER" ]
 
 security:
   providers:

@@ -1,5 +1,7 @@
 package io.helidon.examples.quickstart.se;
 
+import java.util.NoSuchElementException;
+
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
@@ -16,6 +18,7 @@ import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
+import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
@@ -52,6 +55,7 @@ public class Main {
     routing
         .addFilter(AuthFilter.create())
         .register("/api/v1", new UserService())
+        .register("/api", new AuthService())
         .any("/web/register", (request, response) -> {
           logger.info("REGISTER ENDPOINT CALLED");
           response.send("hello from register");
@@ -61,7 +65,8 @@ public class Main {
           response.send("hello from authenticate");
         })
         .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
-        .error(ConstraintViolationException.class, Main::handleError);
+        .error(ConstraintViolationException.class, Main::handleBadArgument)
+        .error(NoSuchElementException.class, Main::handleNotFound);
   }
 
   static void setup(Config config) {
@@ -87,9 +92,14 @@ public class Main {
     return new HikariDataSource(hikariConfig);
   }
 
-  private static void handleError(ServerRequest req, ServerResponse res, ConstraintViolationException ex) {
+  private static void handleBadArgument(ServerRequest req, ServerResponse res, ConstraintViolationException ex) {
     res.status(Status.BAD_REQUEST_400);
     res.send("Unable to parse request. Message: " + ex.getMessage());
+  }
+
+  private static void handleNotFound(ServerRequest req, ServerResponse res, NoSuchElementException ex) {
+    res.status(Status.NOT_FOUND_404);
+    res.send("No such element: " + ex.getMessage());
   }
 
   private static void registerDbClient(Config dbConfig) {
