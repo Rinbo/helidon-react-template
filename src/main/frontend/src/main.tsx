@@ -21,9 +21,9 @@ const router = createHashRouter([
 
 function Index() {
   return (
-    <div className="flex flex-col gap-2 bg-red-700 p-4">
+    <div className="flex flex-col items-center gap-2 bg-cyan-200 p-4">
       <h1 className="text-3xl font-bold">Hello world!</h1>
-      <img src={logo} alt="logo" />
+      <img src={logo} alt="logo" width={600} />
       <Link to={"/about"}>About</Link>
       <Link to={"/login"}>Login</Link>
     </div>
@@ -64,13 +64,12 @@ function About() {
 function Login() {
   const [submitted, setSubmitted] = React.useState(false);
 
-  function onSubmit(e: SubmitEvent) {
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const formData = new FormData(e.target);
+    const target = e.target as HTMLFormElement;
+    const formData = new FormData(target);
     const email = formData.get("email") as string;
-
-    console.log(email, "EMAIL");
 
     fetch("/api/login", {
       method: "POST",
@@ -79,7 +78,7 @@ function Login() {
         "Content-Type": "application/json",
       },
     })
-      .then((res) => setSubmitted(true))
+      .then((_res) => setSubmitted(true))
       .catch((err) => console.error(err));
   }
 

@@ -1,6 +1,9 @@
 package io.helidon.examples.quickstart.se;
 
+import java.time.Duration;
 import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -8,6 +11,8 @@ import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -15,6 +20,8 @@ import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
+import io.helidon.examples.quickstart.se.data.cache.SessionCache;
+import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
@@ -22,6 +29,7 @@ import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
+import io.helidon.scheduling.Scheduling;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 import io.helidon.webserver.http.ServerRequest;
@@ -55,15 +63,7 @@ public class Main {
     routing
         .addFilter(AuthFilter.create())
         .register("/api/v1", new UserService())
-        .register("/api", new AuthService())
-        .any("/web/register", (request, response) -> {
-          logger.info("REGISTER ENDPOINT CALLED");
-          response.send("hello from register");
-        })
-        .any("/web/authenticate", (request, response) -> {
-          logger.info("AUTHENTICATE ENDPOINT CALLED");
-          response.send("hello from authenticate");
-        })
+        .register("/api", new AuthService()) // TODO figure out a better name space
         .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
         .error(ConstraintViolationException.class, Main::handleBadArgument)
         .error(NoSuchElementException.class, Main::handleNotFound);
@@ -77,7 +77,20 @@ public class Main {
     runFlywayMigration(dbConfig);
 
     registerValidator();
-    registerRepositories();
+
+    AuthRepository authRepository = new AuthRepository();
+    registerRepositories(authRepository);
+    registerCaches();
+    configureScheduledJobs(authRepository);
+  }
+
+  private static void configureScheduledJobs(AuthRepository authRepository) {
+    Scheduling.fixedRate()
+        .delay(10)
+        .initialDelay(5)
+        .timeUnit(TimeUnit.MINUTES)
+        .task(invocation -> authRepository.cleanUpTokens())
+        .build();
   }
 
   private static DataSource createDatasource(Config dbConfig) {
@@ -102,15 +115,25 @@ public class Main {
     res.send("No such element: " + ex.getMessage());
   }
 
+  private static void registerCaches() {
+    Cache<UUID, Session> sessionCache = Caffeine.newBuilder()
+        .initialCapacity(1000)
+        .expireAfterWrite(Duration.ofMinutes(5))
+        .build();
+
+    Context context = Contexts.globalContext();
+    context.register(new SessionCache(sessionCache));
+  }
+
   private static void registerDbClient(Config dbConfig) {
     DbClient dbClient = DbClient.create(dbConfig);
     Contexts.globalContext().register(dbClient);
   }
 
-  private static void registerRepositories() {
+  private static void registerRepositories(AuthRepository authRepository) {
     Context context = Contexts.globalContext();
+    context.register(authRepository);
     context.register(new UserRepository());
-    context.register(new AuthRepository());
   }
 
   private static void registerValidator() {

@@ -2,6 +2,54 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.helidon.applications</groupId>
+    <artifactId>helidon-se</artifactId>
+    <version>4.0.10</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>io.helidon.examples</groupId>
+  <artifactId>helidon-quickstart-se</artifactId>
+  <version>0-SNAPSHOT</version>
+
+  <properties>
+    <mainClass>io.helidon.examples.quickstart.se.Main</mainClass>
+
+    <caffine.version>3.1.8</caffine.version>
+    <flyway-core.version>10.15.0</flyway-core.version>
+    <helidon-integrations-jdbc.version>4.0.10</helidon-integrations-jdbc.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyway-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffine.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.helidon.integrations</groupId>
+        <artifactId>helidon-integrations-jdbc-project</artifactId>
+        <version>${helidon-integrations-jdbc.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-database-postgresql</artifactId>
+        <version>${flyway-core.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
 
     <!-- WEBSERVER -->
@@ -99,12 +147,25 @@
     <!-- LOGGING -->
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>io.helidon.logging</groupId>
-      <artifactId>helidon-logging-jul</artifactId>
-      <scope>runtime</scope>
+      <artifactId>helidon-logging-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <!-- CACHING -->
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
     </dependency>
 
     <!-- VALIDATION -->
@@ -134,6 +195,12 @@
       <groupId>io.helidon.metrics</groupId>
       <artifactId>helidon-metrics-system-meters</artifactId>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- SCHEDULING -->
+    <dependency>
+      <groupId>io.helidon.scheduling</groupId>
+      <artifactId>helidon-scheduling</artifactId>
     </dependency>
 
     <!-- TEST -->
@@ -169,46 +236,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>io.helidon.applications</groupId>
-    <artifactId>helidon-se</artifactId>
-    <version>4.0.10</version>
-    <relativePath/>
-  </parent>
-  <groupId>io.helidon.examples</groupId>
-  <artifactId>helidon-quickstart-se</artifactId>
-
-  <version>0-SNAPSHOT</version>
-
-  <properties>
-    <mainClass>io.helidon.examples.quickstart.se.Main</mainClass>
-
-    <flyway-core.version>10.15.0</flyway-core.version>
-    <helidon-integrations-jdbc.version>4.0.10</helidon-integrations-jdbc.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-        <version>${flyway-core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.helidon.integrations</groupId>
-        <artifactId>helidon-integrations-jdbc-project</artifactId>
-        <version>${helidon-integrations-jdbc.version}</version>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-database-postgresql</artifactId>
-        <version>${flyway-core.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <plugins>

@@ -9,11 +9,18 @@
 - [ ] Authorization
 
 # AUTH
-- [ ] Add login endpoint where a user can provide their email - add long or short polling and reroute if a valid accessToken is obtained
-- [ ] Add Database schema for inserting a timed login token - loginToken, userId, expiry
-- [ ] Add scheduled job for deleting old login tokens
+- [x] Add login endpoint where a user can provide their email - add long or short polling and reroute if a valid accessToken is obtained
+- [x] Add Database schema for inserting a timed login token - loginToken, userId, expiry
+- [x] Add scheduled job for deleting old login tokens
+   - [ ] Figure out a way to only run on one instance at a time
 - [ ] Add email link authentication route - path param is login token. If it matches in database and not expired we create a jwt and refresh token and set cookie headers
-- [ ] Implement authentication provider, validate token, check refresh cache and refresh flag
+- [ ] Implement authentication provider, validate token and refresh flag
+
+Refresh flag lives in a cache and is only updated if some change happens to a user or his roles
+When set to true the cache is invalidated, and the next time a user tries to log in we don't even check the expiry of the access token
+we send 401 right away to force a refresh. Refresh always makes a lookup in database. There is one issue however,
+a user may have many access tokens. And only the first time the user tries to use the first one will refresh be triggered. It might not be 
+a big problem if I set access token expiry to just 5 minutes. But it is yet another half measure. 
 
 - Filter
   - "/", "/register", "/authenticate" -> proceed

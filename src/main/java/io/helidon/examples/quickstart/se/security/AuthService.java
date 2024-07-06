@@ -41,6 +41,15 @@ public class AuthService implements HttpService {
   @Override
   public void routing(HttpRules rules) {
     rules.post("/login", this::login);
+    rules.post("/authenticate", this::authenticate);
+  }
+
+  private void authenticate(ServerRequest request, ServerResponse response) {
+    /*
+    Here we need a token and an email address to be sent in the body. Then I look up that token and if I find one, and it has not expired. Then I construct a cookie with a jwt.
+     */
+
+    response.send();
   }
 
   private void login(ServerRequest request, ServerResponse response) {

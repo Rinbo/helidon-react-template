@@ -19,10 +19,16 @@ server:
           methods: [ "get", "post", "put" ]
           roles-allowed: [ "USER" ]
 
+log:
+  level:
+    root: INFO
+    app: INFO
+
 security:
   providers:
     - atn:
       class: io.helidon.examples.quickstart.se.security.AtnProvider
+
 
 db:
   source: "jdbc"
