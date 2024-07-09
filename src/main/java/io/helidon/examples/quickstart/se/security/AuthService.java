@@ -60,7 +60,7 @@ public class AuthService implements HttpService {
     userRepository.findByEmail(email).orElseThrow();
     UUID uuid = authRepository.generateAndGetLoginToken(email);
 
-    logger.info("SENDING MAGIC LINK TO {}: http://localhost:5173/authenticate?token={}&email={}", email, uuid, email);
+    logger.info("SENDING MAGIC LINK TO {}: http://localhost:5173/api/authenticate?token={}&email={}", email, uuid, email);
 
     response.status(Status.CREATED_201).send();
   }

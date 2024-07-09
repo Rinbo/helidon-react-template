@@ -15,7 +15,6 @@ import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbRow;
 import io.helidon.dbclient.DbStatementQuery;
-import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.dto.UserForm;
@@ -28,27 +27,11 @@ public class UserRepository {
     dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
   }
 
-  private static void batchUpdateRoles(int userId, List<Role> roles, DbTransaction transaction) {
-    try (Connection connection = transaction.unwrap(Connection.class)) {
-      PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO authorities (user_id, authority) VALUES (?, ?)");
-
-      for (Role role : roles) {
-        preparedStatement.setInt(1, userId);
-        preparedStatement.setString(2, role.name());
-        preparedStatement.addBatch();
-      }
-
-      preparedStatement.executeBatch();
-
-    } catch (SQLException e) {
-      throw new IllegalStateException("Role update failed", e);
-    }
-  }
-
   private static User extractUser(List<DbRow> rows) {
     DbRow firstRow = rows.getFirst();
+
     List<Role> roles = rows.stream()
-        .filter(row -> row.column("authority").asOptional().isPresent())
+        .filter(row -> row.column("authority").as(Optional::ofNullable).get().isPresent())
         .map(row -> Role.valueOf(row.column("authority").getString()))
         .toList();
 
@@ -126,15 +109,24 @@ public class UserRepository {
   }
 
   public void updateUserRoles(int userId, List<Role> roles) {
-    DbTransaction transaction = dbClient.transaction();
+    try (Connection connection = dbClient.transaction().unwrap(Connection.class)) {
+      try (PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM authorities WHERE user_id = ?")) {
+        deleteStatement.setInt(1, userId);
+        deleteStatement.executeUpdate();
+      }
 
-    transaction.createDelete("DELETE FROM authorities WHERE user_id = :userId")
-        .addParam("userId", userId)
-        .execute();
+      try (PreparedStatement batchStatement = connection.prepareStatement("INSERT INTO authorities (user_id, authority) VALUES (?, ?)")) {
+        for (Role role : roles) {
+          batchStatement.setInt(1, userId);
+          batchStatement.setString(2, role.name());
+          batchStatement.addBatch();
+        }
 
-    if (!roles.isEmpty()) batchUpdateRoles(userId, roles, transaction);
-
-    transaction.commit();
+        batchStatement.executeBatch();
+      }
+    } catch (SQLException e) {
+      throw new IllegalStateException("Role update failed", e);
+    }
   }
 
   private List<User> multiSelect(DbStatementQuery query) {

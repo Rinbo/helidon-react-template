@@ -15,10 +15,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import io.helidon.common.context.Contexts;
 import io.helidon.config.Config;
 import io.helidon.config.ConfigSources;
+import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
-import io.helidon.examples.quickstart.se.utils.TestUtils;
+import io.helidon.examples.quickstart.se.utils.JsonUtils;
 import io.helidon.http.Status;
 import io.helidon.webclient.http1.Http1Client;
 import io.helidon.webclient.http1.Http1ClientResponse;
@@ -26,8 +27,6 @@ import io.helidon.webserver.WebServerConfig;
 import io.helidon.webserver.testing.junit5.ServerTest;
 import io.helidon.webserver.testing.junit5.SetUpServer;
 import jakarta.json.JsonArray;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 
 @ServerTest
 @Testcontainers
@@ -36,7 +35,6 @@ class UserServiceTest {
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest");
 
   private final Http1Client client;
-  private final Jsonb jsonb = JsonbBuilder.create();
 
   public UserServiceTest(Http1Client client) {
     this.client = client;
@@ -99,8 +97,40 @@ class UserServiceTest {
   void testGetUsers() {
     try (Http1ClientResponse response = client.get("/api/v1/users").request()) {
       MatcherAssert.assertThat(response.status(), Matchers.is(Status.OK_200));
-      List<User> users = TestUtils.fromJsonList(response.as(JsonArray.class), User.class);
+      List<User> users = JsonUtils.fromJsonList(response.as(JsonArray.class), User.class);
       verifyUser(users.getFirst());
+    }
+  }
+
+  @Test
+  void updateUserRolesTest() {
+    UserRepository userRepository = Contexts.globalContext().get(UserRepository.class).orElseThrow();
+    User user = userRepository.findById(1).orElseThrow();
+    MatcherAssert.assertThat(user.roles().size(), Matchers.is(1));
+    MatcherAssert.assertThat(user.roles(), Matchers.contains(Role.USER));
+
+    try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of(Role.USER, Role.ADMIN))) {
+      MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
+
+      List<Role> roles = userRepository.findById(1).orElseThrow().roles();
+      MatcherAssert.assertThat(roles.size(), Matchers.is(2));
+      MatcherAssert.assertThat(roles, Matchers.contains(Role.USER, Role.ADMIN));
+    }
+
+    try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of())) {
+      MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
+
+      List<Role> roles = userRepository.findById(1).orElseThrow().roles();
+      MatcherAssert.assertThat(roles.size(), Matchers.is(0));
+      MatcherAssert.assertThat(roles.isEmpty(), Matchers.is(true));
+    }
+
+    try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of(Role.USER, Role.ADMIN, Role.WEBMASTER))) {
+      MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
+
+      List<Role> roles = userRepository.findById(1).orElseThrow().roles();
+      MatcherAssert.assertThat(roles.size(), Matchers.is(3));
+      MatcherAssert.assertThat(roles, Matchers.contains(Role.USER, Role.ADMIN, Role.WEBMASTER));
     }
   }
 }

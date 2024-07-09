@@ -71,7 +71,7 @@ function Login() {
     const formData = new FormData(target);
     const email = formData.get("email") as string;
 
-    fetch("/api/login", {
+    fetch("/api/v1/login", {
       method: "POST",
       body: JSON.stringify({ email }),
       headers: {

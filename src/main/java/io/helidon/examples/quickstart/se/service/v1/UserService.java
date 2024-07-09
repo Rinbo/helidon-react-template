@@ -12,7 +12,6 @@ import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.http.Status;
-import io.helidon.security.SecurityContext;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
 import io.helidon.webserver.http.ServerRequest;
@@ -52,8 +51,6 @@ public class UserService implements HttpService {
     int pageSize = request.prologue().query().first("page-size").asInt().orElse(100);
     int page = request.prologue().query().first("page").asInt().orElse(0);
 
-    SecurityContext context = request.context().get(SecurityContext.class).orElse(null);
-
     List<User> users = userRepository.findPaginatedUsers(pageSize, page);
     response.send(users);
   }
@@ -65,13 +62,14 @@ public class UserService implements HttpService {
    * @param response a list of users
    */
   private void getUsers(ServerRequest request, ServerResponse response) {
-    System.out.println("I AM HIT USERS");
     List<User> users = userRepository.findAll();
     response.send(users);
   }
 
   private void updateUserRoles(ServerRequest request, ServerResponse response) {
     int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
+    //List<Role> roles = JsonUtils.fromJsonList(request.content().as(JsonArray.class), Role.class);
+
     List<?> list = request.content().as(List.class);
 
     List<Role> roles = list.stream()

@@ -62,8 +62,7 @@ public class Main {
   static void configureRouting(HttpRouting.Builder routing) {
     routing
         .addFilter(AuthFilter.create())
-        .register("/api/v1", new UserService())
-        .register("/api", new AuthService()) // TODO figure out a better name space
+        .register("/api/v1", new UserService(), new AuthService())
         .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
         .error(ConstraintViolationException.class, Main::handleBadArgument)
         .error(NoSuchElementException.class, Main::handleNotFound);
