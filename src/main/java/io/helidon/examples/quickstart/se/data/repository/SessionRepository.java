@@ -3,12 +3,12 @@ package io.helidon.examples.quickstart.se.data.repository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 
 public class SessionRepository {
-  private static final Duration EXPIRY = Duration.ofMinutes(1);
+  private static final Duration EXPIRY = Duration.ofDays(30);
   private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
   private final Clock clock;
@@ -46,72 +46,59 @@ public class SessionRepository {
     sessionCache = Contexts.globalContext().get(SessionCache.class).orElseThrow();
   }
 
-  private static Stream<DbRow> executeCountByUserIdQuery(DbExecute dbExecute, int userId) {
-    return dbExecute.createQuery("SELECT count(*) FROM sessions WHERE user_id = :userId")
+  private static long executeCountByUserIdQuery(DbExecute dbExecute, int userId) {
+    return dbExecute.createQuery("SELECT count(*) AS session_count FROM sessions WHERE user_id = :userId")
         .addParam("userId", userId)
-        .execute();
+        .execute()
+        .map(dbRow -> dbRow.column("session_count").getLong())
+        .findFirst()
+        .orElse(0L);
   }
 
   private static long executeDeleteById(DbExecute dbExecute, UUID oldestSessionId) {
     return dbExecute.createDelete("DELETE FROM sessions WHERE id = :id")
-        .addParam("id", oldestSessionId) // Will UUID type work? Need to use string instead?
+        .addParam("id", oldestSessionId)
         .execute();
   }
 
-  private static Stream<DbRow> executeFindOldestByIdQuery(DbExecute dbExecute, int userId) {
-    return dbExecute.createQuery("SELECT * FROM sessions WHERE user_id = :userId ORDER BY expires ASC LIMIT 1")
-        .addParam("userId", userId)
-        .execute();
-  }
-
-  private static long executeInsertSession(DbTransaction transaction, UUID uuid, int userId, Instant expires) {
-    return transaction.createInsert("INSERT INTO sessions (id, user_id, expires) VALUES (:id, :userId, :expires)")
+  private static long executeInsertSession(DbTransaction transaction, UUID uuid, int userId, Instant expires, String userAgent) {
+    return transaction.createInsert("INSERT INTO sessions (id, user_id, expires, user_agent) VALUES (:id, :userId, :expires, :userAgent)")
         .addParam("id", uuid)
         .addParam("userId", userId)
-        .addParam("expires", expires)
+        .addParam("expires", new Date(expires.toEpochMilli()))
+        .addParam("userAgent", userAgent)
         .execute();
   }
 
   private static Session mapToSession(DbRow row) {
     return new Session(
-        row.column("id").get(UUID.class),
-        row.column("userId").getInt(),
+        UUID.fromString(row.column("id").getString()),
+        row.column("user_id").getInt(),
         row.column("expires").get(ZonedDateTime.class)
     );
   }
 
-  public Optional<Session> createForUser(User user) {
+  public Optional<Session> createForUser(User user, String userAgent) {
     Objects.requireNonNull(user, "user must not be null");
+    Objects.requireNonNull(userAgent, "userAgent must not be null");
 
     int userId = user.id();
 
     DbTransaction transaction = dbClient.transaction();
+    transaction.query("SELECT user_id FROM sessions WHERE user_id = ? FOR UPDATE", userId);
 
-    List<DbRow> sessionRows = executeCountByUserIdQuery(transaction, userId).toList();
-
-    if (sessionRows.size() >= 5) {
-      UUID oldestSessionId = executeFindOldestByIdQuery(transaction, userId)
-          .map(SessionRepository::mapToSession)
-          .toList()
-          .getFirst()
-          .id();
-
-      long deleteCount = executeDeleteById(transaction, oldestSessionId);
-      logger.debug("session delete count: {}", deleteCount);
-
-      sessionCache.invalidate(oldestSessionId);
-    }
+    cleanupOldSessions(transaction, userId);
 
     UUID uuid = UUID.randomUUID();
     Instant expires = clock.instant().plus(EXPIRY);
-    long insertCount = executeInsertSession(transaction, uuid, userId, expires);
+    long insertCount = executeInsertSession(transaction, uuid, userId, expires, userAgent);
 
     logger.debug("session insert count {}", insertCount);
 
     transaction.commit();
 
     if (insertCount > 0) {
-      Session session = new Session(uuid, userId, ZonedDateTime.from(expires));
+      Session session = new Session(uuid, userId, ZonedDateTime.ofInstant(expires, ZoneOffset.UTC));
       sessionCache.put(session);
       return Optional.of(session);
     }
@@ -120,4 +107,23 @@ public class SessionRepository {
     return Optional.empty();
   }
 
+  /**
+   * We allow max 5 sessions per user
+   */
+  private void cleanupOldSessions(DbTransaction transaction, int userId) {
+    long sessionCount = executeCountByUserIdQuery(transaction, userId);
+
+    if (sessionCount >= 5) {
+      transaction.createQuery("SELECT * FROM sessions WHERE user_id = :userId ORDER BY expires DESC OFFSET 4")
+          .addParam("userId", userId)
+          .execute()
+          .map(SessionRepository::mapToSession)
+          .forEach(session -> {
+            UUID idToDelete = session.id();
+            long deleteCount = executeDeleteById(transaction, idToDelete);
+            logger.debug("session delete count: {}", deleteCount);
+            sessionCache.invalidate(idToDelete);
+          });
+    }
+  }
 }

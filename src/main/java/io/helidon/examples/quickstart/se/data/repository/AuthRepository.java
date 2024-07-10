@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -72,5 +73,19 @@ public class AuthRepository {
     if (updateCount != 1) throw new IllegalStateException("token generation failed for email: " + email);
 
     return uuid;
+  }
+
+  public boolean isValidLoginToken(String email, String token) {
+    OptionalLong expiryOption = dbClient.execute()
+        .createQuery("SELECT * FROM login_token WHERE email = :email AND token = :token")
+        .addParam("email", email)
+        .addParam("token", token)
+        .execute()
+        .mapToLong(dbRow -> dbRow.column("expiry").getLong())
+        .findFirst();
+
+    if (expiryOption.isEmpty()) return false;
+
+    return expiryOption.getAsLong() > clock.instant().toEpochMilli();
   }
 }

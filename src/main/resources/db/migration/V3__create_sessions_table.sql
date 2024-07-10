@@ -1,6 +1,6 @@
 CREATE TABLE sessions
 (
-    id            UUID PRIMARY KEY,
+    id            CHAR(36) PRIMARY KEY,
     user_id       SERIAL                      NOT NULL,
     expires       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     user_agent    VARCHAR(255)                NOT NULL,

@@ -23,6 +23,7 @@ import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
+import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
@@ -78,8 +79,8 @@ public class Main {
     registerValidator();
 
     AuthRepository authRepository = new AuthRepository();
-    registerRepositories(authRepository);
     registerCaches();
+    registerRepositories(authRepository);
     configureScheduledJobs(authRepository);
   }
 
@@ -133,6 +134,7 @@ public class Main {
     Context context = Contexts.globalContext();
     context.register(authRepository);
     context.register(new UserRepository());
+    context.register(new SessionRepository());
   }
 
   private static void registerValidator() {
