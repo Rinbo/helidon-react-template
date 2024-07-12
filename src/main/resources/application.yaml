@@ -16,6 +16,8 @@ security:
   providers:
     - atn:
       class: io.helidon.examples.quickstart.se.security.AtnProvider
+    - atz:
+      class: io.helidon.examples.quickstart.se.security.AtzProvider
 
 db:
   source: "jdbc"

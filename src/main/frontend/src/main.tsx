@@ -59,8 +59,9 @@ function About() {
       <div className="flex flex-col items-center justify-center gap-3">
         Message from server:{" "}
         {response.map((user) => (
-          <pre className="rounded-md bg-cyan-200 p-2">
-            {JSON.stringify(user, null, 2)}
+          <pre key={user.id} className="w-full rounded-md bg-cyan-200 p-2">
+            <UpdateRoles user={user} />
+            {/*{JSON.stringify(user, null, 2)}*/}
           </pre>
         ))}
       </div>
@@ -161,6 +162,51 @@ function Authenticate() {
   }
 
   return <div>Attempting authentication</div>;
+}
+
+const roleList = ["USER", "ADMIN", "WEBMASTER"] as const;
+
+function UpdateRoles({ user }: { user: User }) {
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+
+    const selectedRoles = formData.getAll("role-select") as string[];
+    console.log(selectedRoles);
+
+    fetch(`/api/v1/users/${user.id}/roles`, {
+      method: "PUT",
+      body: JSON.stringify(selectedRoles),
+      headers: { "Content-Type": "application/json" },
+    }).then((res) => {
+      if (res.ok) {
+        console.log("SUCCESS");
+      } else {
+        console.error("ERROR");
+      }
+    });
+  }
+
+  const roles = user.roles;
+
+  return (
+    <div>
+      <div>UserId: {user.id}</div>
+      <div>Name: {user.name}</div>
+      <form onSubmit={onSubmit}>
+        <select name={"role-select"} multiple defaultValue={roles}>
+          {roleList.map((role) => (
+            <option key={role} value={role}>
+              {role}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="m-2 p-4">
+          Save
+        </button>
+      </form>
+    </div>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

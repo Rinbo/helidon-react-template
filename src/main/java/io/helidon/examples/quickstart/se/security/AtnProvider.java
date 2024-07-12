@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,11 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Contexts;
+import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.Session;
+import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
+import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.security.AuthenticationResponse;
+import io.helidon.security.Grant;
+import io.helidon.security.Principal;
 import io.helidon.security.ProviderRequest;
 import io.helidon.security.SecurityResponse;
+import io.helidon.security.Subject;
 import io.helidon.security.spi.AuthenticationProvider;
 
 public class AtnProvider implements AuthenticationProvider {
@@ -25,10 +32,12 @@ public class AtnProvider implements AuthenticationProvider {
 
   private final Clock clock;
   private final SessionRepository sessionRepository;
+  private final UserRepository userRepository;
 
   public AtnProvider() {
     clock = Clock.systemUTC();
     sessionRepository = Contexts.globalContext().get(SessionRepository.class).orElseThrow();
+    userRepository = Contexts.globalContext().get(UserRepository.class).orElseThrow();
   }
 
   private static AuthenticationResponse createFailureResponse() {
@@ -38,6 +47,32 @@ public class AtnProvider implements AuthenticationProvider {
         .status(SecurityResponse.SecurityStatus.FAILURE)
         .responseHeaders(Map.of("WWW-Authenticate", List.of("")))
         .build();
+  }
+
+  private static Principal createPrincipal(User user) {
+    return Principal.builder()
+        .id(String.valueOf(user.id()))
+        .name(user.name())
+        .build();
+  }
+
+  private static Function<Role, Grant> createRoleGrant() {
+    return role -> Grant.builder()
+        .name(role.name())
+        .type("role")
+        .build();
+  }
+
+  private static Subject createSubject(User user) {
+    Subject.Builder subjectBuilder = Subject.builder()
+        .addPrincipal(createPrincipal(user));
+
+    user.roles()
+        .stream()
+        .map(createRoleGrant())
+        .forEach(subjectBuilder::addGrant);
+
+    return subjectBuilder.build();
   }
 
   private static Optional<String> getSessionIdOption(List<String> stringList) {
@@ -55,8 +90,13 @@ public class AtnProvider implements AuthenticationProvider {
 
     return getSessionIdOption(providerRequest.env().headers().getOrDefault("Cookie", List.of()))
         .flatMap(this::getValidSession)
-        .map(session -> AuthenticationResponse.success(null, null))
+        .flatMap(this::getUser)
+        .map(user -> AuthenticationResponse.success(createSubject(user), null))
         .orElseGet(AtnProvider::createFailureResponse);
+  }
+
+  private Optional<User> getUser(Session session) {
+    return userRepository.findById(session.userId());
   }
 
   private Optional<Session> getValidSession(String sessionId) {
