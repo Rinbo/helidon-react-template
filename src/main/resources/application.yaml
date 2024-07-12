@@ -30,4 +30,5 @@ db:
 
 app:
   greeting: "Hello"
+  profile: "dev"
 

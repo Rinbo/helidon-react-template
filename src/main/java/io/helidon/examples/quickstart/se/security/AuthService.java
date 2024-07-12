@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
+import io.helidon.config.Config;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
+import io.helidon.examples.quickstart.se.utils.Constants;
 import io.helidon.examples.quickstart.se.utils.Validate;
 import io.helidon.http.HeaderNames;
 import io.helidon.http.HttpException;
@@ -50,13 +52,12 @@ public class AuthService implements HttpService {
   }
 
   private static SetCookie createCookie(Session session) {
-    return SetCookie.builder("JSESSION", session.id().toString())
-        .domain("localhost")
+    return SetCookie.builder(Constants.COOKIE_SESSION_NAME, session.id().toString())
         .path("/")
-        .expires(Instant.now().plusSeconds(3600 * 24 * 30))
+        .expires(Instant.now().plusSeconds(Constants.SESSION_DURATION.toSeconds()))
         .httpOnly(true)
-        .secure(false)
-        .sameSite(SetCookie.SameSite.LAX)
+        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("dev"))
+        .sameSite(SetCookie.SameSite.STRICT)
         .build();
   }
 

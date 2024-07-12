@@ -1,0 +1,12 @@
+package io.helidon.examples.quickstart.se.utils;
+
+import java.time.Duration;
+
+public final class Constants {
+  public static final String COOKIE_SESSION_NAME = "JSESSION";
+  public static final Duration SESSION_DURATION = Duration.ofDays(30);
+
+  private Constants() {
+    throw new IllegalStateException("Utility class");
+  }
+}

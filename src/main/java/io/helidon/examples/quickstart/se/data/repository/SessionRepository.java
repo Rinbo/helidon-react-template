@@ -1,7 +1,6 @@
 package io.helidon.examples.quickstart.se.data.repository;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -21,9 +20,9 @@ import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
+import io.helidon.examples.quickstart.se.utils.Constants;
 
 public class SessionRepository {
-  private static final Duration EXPIRY = Duration.ofDays(30);
   private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
   private final Clock clock;
@@ -90,7 +89,7 @@ public class SessionRepository {
     cleanupOldSessions(transaction, userId);
 
     UUID uuid = UUID.randomUUID();
-    Instant expires = clock.instant().plus(EXPIRY);
+    Instant expires = clock.instant().plus(Constants.SESSION_DURATION);
     long insertCount = executeInsertSession(transaction, uuid, userId, expires, userAgent);
 
     logger.debug("session insert count {}", insertCount);
@@ -105,6 +104,33 @@ public class SessionRepository {
 
     logger.warn("session insert count is zero");
     return Optional.empty();
+  }
+
+  public Optional<Session> findById(UUID id) {
+    Objects.requireNonNull(id, "id must not be null");
+
+    logger.debug("looking up sessionId {}", id);
+
+    Session session = sessionCache.get(id);
+
+    if (session == null) {
+      logger.debug("nothing in cache, looking in db");
+
+      Optional<Session> sessionOptional = dbClient.execute()
+          .createQuery("SELECT * FROM sessions WHERE id = :id")
+          .addParam("id", id.toString())
+          .execute()
+          .map(SessionRepository::mapToSession)
+          .findFirst();
+
+      logger.debug("found session in db: {}", sessionOptional.isPresent());
+
+      sessionOptional.ifPresent(sessionCache::put);
+      return sessionOptional;
+    }
+
+    logger.debug("found session in cache {}", session);
+    return Optional.of(session);
   }
 
   /**
