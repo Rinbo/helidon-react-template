@@ -8,27 +8,14 @@ server:
       defaults:
         authenticate: true
       paths:
-        - path: "/api/register"
-          methods: [ "get", "post" ]
-          authenticate: false
-        - path: "/api/login"
-          authenticate: false
-        - path: "/api/authenticate"
-          authenticate: false
-        - path: "/api/v1/users[/{*}]"
-          methods: [ "get", "post", "put" ]
-          roles-allowed: [ "USER" ]
-
-log:
-  level:
-    root: INFO
-    app: INFO
+        - path: "/api/*"
+        - path: "/api/v1/users/{}/roles"
+          roles-allowed: [ "ADMIN" ]
 
 security:
   providers:
     - atn:
       class: io.helidon.examples.quickstart.se.security.AtnProvider
-
 
 db:
   source: "jdbc"

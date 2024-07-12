@@ -15,10 +15,10 @@ import io.helidon.webserver.http.ServerRequest;
 import io.helidon.webserver.http.ServerResponse;
 
 public class AuthFilter implements Filter {
-  public static final PathMatcher AUTHENTICATE = PathMatchers.create("/api/authenticate");
-  public static final PathMatcher LOGIN = PathMatchers.create("/api/login");
-  public static final PathMatcher LOGOUT = PathMatchers.create("/api/logout");
-  public static final PathMatcher REGISTER = PathMatchers.create("/api/register");
+  public static final PathMatcher AUTHENTICATE = PathMatchers.create("/auth/web/authenticate");
+  public static final PathMatcher LOGIN = PathMatchers.create("/auth/web/login");
+  public static final PathMatcher LOGOUT = PathMatchers.create("/auth/web/logout");
+  public static final PathMatcher REGISTER = PathMatchers.create("/auth/web/register");
   public static final PathMatcher ROOT = PathMatchers.create("/");
 
   private static final PathMatcher ASSETS = PathMatchers.create("/assets/*");

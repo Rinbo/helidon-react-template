@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import {
   createHashRouter,
   Link,
+  Navigate,
   RouterProvider,
   useNavigate,
   useSearchParams,
@@ -45,9 +46,8 @@ type ResponseType = User[];
 
 function About() {
   const [response, setResponse] = React.useState<ResponseType>([]);
-
   React.useEffect(() => {
-    fetch("/api/v1/users")
+    fetch("/api/v1/users", { headers: { withCredentials: "true" } })
       .then((res) => res.json())
       .then((data) => setResponse(data))
       .catch((e) => console.error(e));
@@ -81,14 +81,14 @@ function Login() {
     const formData = new FormData(target);
     const email = formData.get("email") as string;
 
-    fetch("/api/v1/login", {
+    fetch("/auth/web/login", {
       method: "POST",
       body: JSON.stringify({ email }),
       headers: {
         "Content-Type": "application/json",
       },
     })
-      .then((_res) => setSubmitted(true))
+      .then(() => setSubmitted(true))
       .catch((err) => console.error(err));
   }
 
@@ -125,17 +125,20 @@ function Login() {
 }
 
 function Authenticate() {
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [error, setError] = React.useState(false);
 
   const email = searchParams.get("email");
   const token = searchParams.get("token");
-  console.log(email, token);
 
   React.useEffect(() => {
-    const params = new URLSearchParams({ email, token });
-    fetch(`/api/v1/authenticate?${params.toString()}`, { method: "POST" })
+    if (!token || !email) return;
+
+    fetch(
+      `/auth/web/authenticate?${new URLSearchParams({ email, token }).toString()}`,
+      { method: "POST" },
+    )
       .then((res) => {
         if (res.ok) {
           console.log("Authenticated successfully");
@@ -149,9 +152,9 @@ function Authenticate() {
         console.error("Authentication failed", err);
         setError(true);
       });
-  }, []);
+  }, [email, navigate, token]);
 
-  //if (!token || !email) return <Navigate to={"/"} />;
+  if (!token || !email) return <Navigate to={"/"} />;
 
   if (error) {
     return <div className="text-lg text-red-400">Authentication failed</div>;

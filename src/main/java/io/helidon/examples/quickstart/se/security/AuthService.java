@@ -50,7 +50,7 @@ public class AuthService implements HttpService {
   }
 
   private static SetCookie createCookie(Session session) {
-    return SetCookie.builder("MYSESSION", session.id().toString())
+    return SetCookie.builder("JSESSION", session.id().toString())
         .domain("localhost")
         .path("/")
         .expires(Instant.now().plusSeconds(3600 * 24 * 30))
