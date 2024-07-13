@@ -3,7 +3,6 @@ package io.helidon.examples.quickstart.se.utils;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,9 +38,8 @@ public final class SessionUtils {
         .build();
   }
 
-  public static Optional<String> getSessionIdOption(Map<String, List<String>> map) {
-    return map
-        .getOrDefault("Cookie", List.of())
+  public static Optional<String> getSessionIdOption(List<String> cookiesStrings) {
+    return cookiesStrings
         .stream()
         .map(SESSION_PATTERN::matcher)
         .filter(Matcher::find)

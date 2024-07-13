@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
+import io.helidon.config.Config;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
@@ -79,14 +80,16 @@ public class AuthService implements HttpService {
     userRepository.findByEmail(email).orElseThrow();
     UUID uuid = authRepository.generateAndGetLoginToken(email);
 
-    logger.info("SENDING MAGIC LINK TO {}: http://localhost:5173/#/authenticate?token={}&email={}", email, uuid, email);
+    String frontendUrl = Config.global().get("app.frontend.url").asString().orElseThrow();
+    logger.info("SENDING MAGIC LINK TO {}: {}/#/authenticate?token={}&email={}", email, frontendUrl, uuid, email);
 
     response.status(Status.CREATED_201).send();
   }
 
   private void logout(ServerRequest request, ServerResponse response) {
     Optional<Principal> principalOption = request.context().get(Principal.class);
-    Optional<String> sessionIdOption = SessionUtils.getSessionIdOption(request.headers().cookies().toMap());
+    Optional<String> sessionIdOption = SessionUtils.getSessionIdOption(request.headers().get(HeaderNames.COOKIE).allValues());
+
     logger.debug("logging out user {} with session {}", principalOption, sessionIdOption);
 
     sessionIdOption.ifPresent(sessionId -> sessionRepository.deleteById(UUID.fromString(sessionId)));

@@ -1,5 +1,6 @@
 server:
   port: 8080
+  host: 0.0.0.0
   static:
     classpath:
       location: /web
@@ -11,6 +12,7 @@ server:
         - path: "/api/*"
         - path: "/api/v1/users/{}/roles"
           roles-allowed: [ "ADMIN" ]
+        - path: "/auth/web/logout"
 
 security:
   providers:
@@ -31,6 +33,7 @@ db:
     min-idle: 2
 
 app:
-  greeting: "Hello"
   profile: "dev"
+  frontend:
+    url: "http://localhost:5173"
 
