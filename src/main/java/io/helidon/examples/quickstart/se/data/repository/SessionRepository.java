@@ -106,6 +106,13 @@ public class SessionRepository {
     return Optional.empty();
   }
 
+  public void deleteById(UUID id) {
+    long deleteCount = executeDeleteById(dbClient.execute(), id);
+    logger.debug("deleted session: {}, count {}", id, deleteCount);
+
+    sessionCache.invalidate(id);
+  }
+
   public Optional<Session> findById(UUID id) {
     Objects.requireNonNull(id, "id must not be null");
 
@@ -147,7 +154,7 @@ public class SessionRepository {
           .forEach(session -> {
             UUID idToDelete = session.id();
             long deleteCount = executeDeleteById(transaction, idToDelete);
-            logger.debug("session delete count: {}", deleteCount);
+            logger.debug("cleanup job - session delete count: {}", deleteCount);
             sessionCache.invalidate(idToDelete);
           });
     }

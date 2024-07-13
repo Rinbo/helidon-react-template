@@ -54,21 +54,29 @@ function About() {
   }, []);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center">
+    <div className="flex h-full flex-col items-center justify-center gap-2">
+      <Logout />
       <div className="text-3xl">About</div>
-      <div className="flex flex-col items-center justify-center gap-3">
-        Message from server:{" "}
+      <div>Message from server:</div>
+      <div className="flex flex-row flex-wrap items-center justify-center gap-3">
         {response.map((user) => (
-          <pre key={user.id} className="w-full rounded-md bg-cyan-200 p-2">
+          <pre key={user.id} className="rounded-md bg-cyan-200 p-2">
             <UpdateRoles user={user} />
-            {/*{JSON.stringify(user, null, 2)}*/}
           </pre>
         ))}
       </div>
-      <Link className="hover:bg-cyan-400" to="/">
+      <Link className="mt-10 hover:bg-cyan-400" to="/">
         Home
       </Link>
     </div>
+  );
+}
+
+function Logout() {
+  return (
+    <form action="/auth/web/logout" method="POST">
+      <button className="rounded bg-cyan-200 p-4">Logout</button>
+    </form>
   );
 }
 

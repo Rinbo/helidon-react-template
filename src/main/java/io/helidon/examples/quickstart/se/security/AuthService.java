@@ -1,7 +1,8 @@
 package io.helidon.examples.quickstart.se.security;
 
-import java.time.Instant;
+import java.security.Principal;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -9,18 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
-import io.helidon.config.Config;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
-import io.helidon.examples.quickstart.se.utils.Constants;
+import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
 import io.helidon.http.HeaderNames;
 import io.helidon.http.HttpException;
-import io.helidon.http.SetCookie;
 import io.helidon.http.Status;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
@@ -51,20 +50,11 @@ public class AuthService implements HttpService {
     userRepository = context.get(UserRepository.class).orElseThrow();
   }
 
-  private static SetCookie createCookie(Session session) {
-    return SetCookie.builder(Constants.COOKIE_SESSION_NAME, session.id().toString())
-        .path("/")
-        .expires(Instant.now().plusSeconds(Constants.SESSION_DURATION.toSeconds()))
-        .httpOnly(true)
-        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("dev"))
-        .sameSite(SetCookie.SameSite.STRICT)
-        .build();
-  }
-
   @Override
   public void routing(HttpRules rules) {
     rules.post("/login", this::login);
     rules.post("/authenticate", this::authenticate);
+    rules.post("/logout", this::logout);
   }
 
   private void authenticate(ServerRequest request, ServerResponse response) {
@@ -77,7 +67,7 @@ public class AuthService implements HttpService {
     String userAgent = request.headers().get(HeaderNames.USER_AGENT).asOptional().orElse("unknown");
     Session session = sessionRepository.createForUser(user, userAgent).orElseThrow(() -> new HttpException("unauthorized", Status.UNAUTHORIZED_401));
 
-    response.headers().addCookie(createCookie(session));
+    response.headers().addCookie(SessionUtils.createCookie(session));
     response.send();
   }
 
@@ -92,5 +82,16 @@ public class AuthService implements HttpService {
     logger.info("SENDING MAGIC LINK TO {}: http://localhost:5173/#/authenticate?token={}&email={}", email, uuid, email);
 
     response.status(Status.CREATED_201).send();
+  }
+
+  private void logout(ServerRequest request, ServerResponse response) {
+    Optional<Principal> principalOption = request.context().get(Principal.class);
+    Optional<String> sessionIdOption = SessionUtils.getSessionIdOption(request.headers().cookies().toMap());
+    logger.debug("logging out user {} with session {}", principalOption, sessionIdOption);
+
+    sessionIdOption.ifPresent(sessionId -> sessionRepository.deleteById(UUID.fromString(sessionId)));
+    response.headers().addCookie(SessionUtils.createLogoutCookie());
+    response.headers().add(HeaderNames.LOCATION, "/");
+    response.status(Status.FOUND_302).send();
   }
 }

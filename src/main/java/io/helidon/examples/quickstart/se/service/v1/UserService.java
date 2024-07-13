@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.helidon.common.GenericType;
 import io.helidon.common.context.Contexts;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
@@ -74,14 +75,9 @@ public class UserService implements HttpService {
 
   private void updateUserRoles(ServerRequest request, ServerResponse response) {
     int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
-    //List<Role> roles = JsonUtils.fromJsonList(request.content().as(JsonArray.class), Role.class);
 
-    List<?> list = request.content().as(List.class);
-
-    List<Role> roles = list.stream()
-        .map(String.class::cast)
-        .map(Role::valueOf)
-        .toList();
+    List<Role> roles = request.content().as(new GenericType<>() {
+    });
 
     userRepository.updateUserRoles(userId, roles);
     response.status(Status.CREATED_201).send();

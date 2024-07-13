@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,7 @@ import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.security.AuthenticationResponse;
 import io.helidon.security.Grant;
 import io.helidon.security.Principal;
@@ -27,7 +26,6 @@ import io.helidon.security.Subject;
 import io.helidon.security.spi.AuthenticationProvider;
 
 public class AtnProvider implements AuthenticationProvider {
-  static final Pattern SESSION_PATTERN = Pattern.compile("JSESSION=([\\w|-]{36})");
   private static final Logger logger = LoggerFactory.getLogger(AtnProvider.class);
 
   private final Clock clock;
@@ -51,7 +49,7 @@ public class AtnProvider implements AuthenticationProvider {
 
   private static Principal createPrincipal(User user) {
     return Principal.builder()
-        .id(String.valueOf(user.id()))
+        .id(user.email())
         .name(user.name())
         .build();
   }
@@ -75,20 +73,11 @@ public class AtnProvider implements AuthenticationProvider {
     return subjectBuilder.build();
   }
 
-  private static Optional<String> getSessionIdOption(List<String> stringList) {
-    return stringList
-        .stream()
-        .map(SESSION_PATTERN::matcher)
-        .filter(Matcher::find)
-        .map(matcher -> matcher.group(1))
-        .findFirst();
-  }
-
   @Override
   public AuthenticationResponse authenticate(ProviderRequest providerRequest) {
     logger.debug("ENTERED AUTH PROVIDER");
 
-    return getSessionIdOption(providerRequest.env().headers().getOrDefault("Cookie", List.of()))
+    return SessionUtils.getSessionIdOption(providerRequest.env().headers())
         .flatMap(this::getValidSession)
         .flatMap(this::getUser)
         .map(user -> AuthenticationResponse.success(createSubject(user), null))
