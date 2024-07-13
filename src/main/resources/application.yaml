@@ -13,6 +13,7 @@ server:
         - path: "/api/v1/users/{}/roles"
           roles-allowed: [ "ADMIN" ]
         - path: "/auth/web/logout"
+        - path: "/auth/web/principal"
 
 security:
   providers:

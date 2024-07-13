@@ -9,12 +9,24 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import "./index.css";
-import logo from "./assets/react.svg";
+import Landing from "./views/landing.tsx";
+import MainLayout from "./views/main-layout.tsx";
+import { authProvider } from "./auth/auth.ts";
 
 const router = createHashRouter([
   {
     path: "/",
-    element: <Index />,
+    async loader() {
+      await authProvider.fetchPrincipal();
+      return { principal: authProvider.principal };
+    },
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <Landing />,
+      },
+    ],
   },
   {
     path: "/about",
@@ -29,17 +41,6 @@ const router = createHashRouter([
     element: <Authenticate />,
   },
 ]);
-
-function Index() {
-  return (
-    <div className="flex h-full flex-col items-center gap-2 bg-cyan-200 p-4">
-      <h1 className="text-3xl font-bold">Hello world!</h1>
-      <img src={logo} alt="logo" width={600} />
-      <Link to={"/about"}>About</Link>
-      <Link to={"/login"}>Login</Link>
-    </div>
-  );
-}
 
 type User = { id: number; email: string; name: string; roles: string[] };
 type ResponseType = User[];

@@ -5,43 +5,11 @@
 - [x] Unit testing
 - [x] Integration testing
 - [x] Pagination (improved version)
-- [ ] Authentication (magic link)
-- [ ] Authorization
-
-# AUTH
-- [x] Add login endpoint where a user can provide their email - add long or short polling and reroute if a valid accessToken is obtained
-- [x] Add Database schema for inserting a timed login token - loginToken, userId, expiry
-- [x] Add scheduled job for deleting old login tokens
-   - [ ] Figure out a way to only run on one instance at a time
-- [ ] Add email link authentication route - path param is login token. If it matches in database and not expired we create a jwt and refresh token and set cookie headers
-- [ ] Implement authentication provider, validate token and refresh flag
-
-Refresh flag lives in a cache and is only updated if some change happens to a user or his roles
-When set to true the cache is invalidated, and the next time a user tries to log in we don't even check the expiry of the access token
-we send 401 right away to force a refresh. Refresh always makes a lookup in database. There is one issue however,
-a user may have many access tokens. And only the first time the user tries to use the first one will refresh be triggered. It might not be 
-a big problem if I set access token expiry to just 5 minutes. But it is yet another half measure. 
-
-- Filter
-  - "/", "/register", "/authenticate" -> proceed
-  1. Check if there is an entry in cache for refresh token and if refreshing token is required
-     - If required reach into db and validate refresh token. 
-     - Grab user roles from db. 
-     - Create a new accessToken and refresh token, persist and add to headers
-     - Notify other instances to invalidate cache.
-  2. Validate 5 min auth token
-  3. Proceed
-
-If role change occurs or user is deleted, cache has to be invalidated. 
-If we cannot find in cache we look in db.
-If we cannot find in db we throw 403
-If we find in db are we happy? We just reuse it? Yes, but there will be one more field "reauthenticate" true/false.
-If this field is true, we must produce new refresh token and accessToken. 
-Persist, set reauthenticate flag to false, notify other instances to invalidate.
-Add new Set-Cookie headers, add new tokens to cache.
-
-How do I lookup the token? Is it a uuid?
-
+- [x] Authentication (magic link)
+- [x] Authorization
+- [ ] Frontend layout
+- [ ] Authentication provider
+- [ ] Toast
 
 Sample Helidon SE project that includes multiple REST operations.
 

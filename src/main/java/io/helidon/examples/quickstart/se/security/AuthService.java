@@ -1,6 +1,5 @@
 package io.helidon.examples.quickstart.se.security;
 
-import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +21,7 @@ import io.helidon.examples.quickstart.se.utils.Validate;
 import io.helidon.http.HeaderNames;
 import io.helidon.http.HttpException;
 import io.helidon.http.Status;
+import io.helidon.security.Principal;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
 import io.helidon.webserver.http.ServerRequest;
@@ -56,6 +56,7 @@ public class AuthService implements HttpService {
     rules.post("/login", this::login);
     rules.post("/authenticate", this::authenticate);
     rules.post("/logout", this::logout);
+    rules.get("/principal", this::fetchPrincipal);
   }
 
   private void authenticate(ServerRequest request, ServerResponse response) {
@@ -70,6 +71,13 @@ public class AuthService implements HttpService {
 
     response.headers().addCookie(SessionUtils.createCookie(session));
     response.send();
+  }
+
+  private void fetchPrincipal(ServerRequest request, ServerResponse response) {
+    request.context().get(Principal.class)
+        .map(Principal::id)
+        .map(userRepository::findByEmail)
+        .ifPresentOrElse(response::send, () -> response.status(Status.UNAUTHORIZED_401).send());
   }
 
   private void login(ServerRequest request, ServerResponse response) {
