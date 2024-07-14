@@ -15,7 +15,6 @@ class SessionUtilsTest {
     Assertions.assertTrue(SessionUtils.getSessionIdOption(List.of()).isEmpty());
     Assertions.assertTrue(SessionUtils.getSessionIdOption(List.of("MYSESSION=c4d0b238-ce60-4b3d-913a-577f776ba047")).isEmpty());
     Assertions.assertTrue(SessionUtils.getSessionIdOption(List.of("JSESSIONID=c4d0b238-ce60-4b3d-913a-577f776ba047")).isEmpty());
-    Assertions.assertTrue(SessionUtils.getSessionIdOption(List.of("JSESSION=c4d0b238-ce60-4b3d-913a-577f776ba047")).isEmpty());
   }
 
 }

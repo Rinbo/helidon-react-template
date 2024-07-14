@@ -1,5 +1,7 @@
 package io.helidon.examples.quickstart.se;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
+import io.helidon.common.media.type.MediaTypes;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
@@ -65,7 +68,8 @@ public class Main {
         .addFilter(AuthFilter.create())
         .register("/auth/web", new AuthService())
         .register("/api/v1", new UserService())
-        .register("/", StaticContentService.builder("/web").welcomeFileName("index.html").build())
+        .register(StaticContentService.builder("/web").welcomeFileName("index.html").build())
+        .register("/{+path}", rules -> rules.get(Main::serveReactApp))
         .error(ConstraintViolationException.class, Main::handleBadArgument)
         .error(NoSuchElementException.class, Main::handleNotFound);
   }
@@ -147,5 +151,21 @@ public class Main {
   private static void runFlywayMigration(Config dbConfig) {
     Flyway flyway = Flyway.configure().dataSource(createDatasource(dbConfig)).load();
     flyway.migrate();
+  }
+
+  private static void serveReactApp(ServerRequest request, ServerResponse response) {
+    try (InputStream is = Main.class.getResourceAsStream("/web/index.html")) {
+      if (is == null) {
+        response.status(Status.NOT_FOUND_404);
+        response.send("index.html not found");
+      } else {
+        response.status(Status.OK_200);
+        response.headers().contentType(MediaTypes.TEXT_HTML);
+        is.transferTo(response.outputStream());
+      }
+    } catch (IOException e) {
+      response.status(Status.INTERNAL_SERVER_ERROR_500);
+      response.send("Error reading index.html: " + e.getMessage());
+    }
   }
 }

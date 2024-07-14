@@ -1,19 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  createHashRouter,
-  Link,
-  Navigate,
-  RouterProvider,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { createBrowserRouter, Link, Navigate, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
 import "./index.css";
 import Landing from "./views/landing.tsx";
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 
-const router = createHashRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     async loader() {
@@ -26,11 +19,11 @@ const router = createHashRouter([
         index: true,
         element: <Landing />,
       },
+      {
+        path: "about",
+        element: <About />,
+      },
     ],
-  },
-  {
-    path: "/about",
-    element: <About />,
   },
   {
     path: "/login",
@@ -111,10 +104,7 @@ function Login() {
         placeholder="Enter your email"
         name="email"
       />
-      <button
-        type="submit"
-        className="rounded-md border border-gray-300 bg-cyan-200 p-2"
-      >
+      <button type="submit" className="rounded-md border border-gray-300 bg-cyan-200 p-2">
         Submit
       </button>
     </form>
@@ -145,10 +135,7 @@ function Authenticate() {
   React.useEffect(() => {
     if (!token || !email) return;
 
-    fetch(
-      `/auth/web/authenticate?${new URLSearchParams({ email, token }).toString()}`,
-      { method: "POST" },
-    )
+    fetch(`/auth/web/authenticate?${new URLSearchParams({ email, token }).toString()}`, { method: "POST" })
       .then((res) => {
         if (res.ok) {
           console.log("Authenticated successfully");

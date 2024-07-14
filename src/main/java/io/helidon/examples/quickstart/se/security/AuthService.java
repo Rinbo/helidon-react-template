@@ -89,7 +89,7 @@ public class AuthService implements HttpService {
     UUID uuid = authRepository.generateAndGetLoginToken(email);
 
     String frontendUrl = Config.global().get("app.frontend.url").asString().orElseThrow();
-    logger.info("SENDING MAGIC LINK TO {}: {}/#/authenticate?token={}&email={}", email, frontendUrl, uuid, email);
+    logger.info("SENDING MAGIC LINK TO {}: {}/authenticate?token={}&email={}", email, frontendUrl, uuid, email);
 
     response.status(Status.CREATED_201).send();
   }
