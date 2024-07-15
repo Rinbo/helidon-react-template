@@ -5,28 +5,20 @@ export type Principal = { name: string; email: string; roles: Role[] };
 
 interface AuthProvider {
   principal: Principal | null;
-  signin(username: string): Promise<void>;
-  signout(): Promise<void>;
+  logout(): Promise<void>;
   fetchPrincipal(): Promise<void>;
 }
 
 export const authProvider: AuthProvider = {
   principal: null,
-  async signin(username: string) {
-    console.log(username);
-    await new Promise((r) => setTimeout(r, 500)); // fake delay
-    // TODO set principal
-  },
-  async signout() {
-    await new Promise((r) => setTimeout(r, 500)); // fake delay
+  async logout() {
+    await fetcher({ path: "/auth/web/logout", method: "POST" });
     authProvider.principal = null;
   },
   async fetchPrincipal() {
     try {
       const response = await fetcher({ path: "/auth/web/principal" });
-      const user = (await response.json()) satisfies Principal;
-      console.log(user, "USER");
-      authProvider.principal = user;
+      authProvider.principal = (await response.json()) satisfies Principal;
     } catch (error) {
       console.info("No active session");
     }

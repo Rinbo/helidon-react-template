@@ -1,11 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, Link, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
+import { createBrowserRouter, Link, redirect, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
 import "./index.css";
 import Landing from "./views/landing.tsx";
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
+import LogoutForm from "./views/logout/logout-form.tsx";
+import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 
 const router = createBrowserRouter([
   {
@@ -22,22 +24,31 @@ const router = createBrowserRouter([
       },
       {
         path: "about",
+        handle: {},
         element: <About />,
+      },
+      {
+        path: "/login",
+        element: <LoginView />,
+        action: loginAction,
+      },
+      {
+        path: "/verify",
+        element: <Authenticate />,
+      },
+      {
+        path: "/register",
+        element: <RegistrationView />,
+        action: registrationAction,
       },
     ],
   },
   {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/verify",
-    element: <Authenticate />,
-  },
-  {
-    path: "/register",
-    element: <RegistrationView />,
-    action: registrationAction,
+    path: "/logout",
+    async action() {
+      await authProvider.logout();
+      return redirect("/");
+    },
   },
 ]);
 
@@ -46,6 +57,7 @@ type ResponseType = User[];
 
 function About() {
   const [response, setResponse] = React.useState<ResponseType>([]);
+
   React.useEffect(() => {
     fetch("/api/v1/users", { headers: { withCredentials: "true" } })
       .then((res) => res.json())
@@ -55,7 +67,7 @@ function About() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2">
-      <Logout />
+      <LogoutForm />
       <div className="text-3xl">About</div>
       <div>Message from server:</div>
       <div className="flex flex-row flex-wrap items-center justify-center gap-3">
@@ -68,64 +80,6 @@ function About() {
       <Link className="mt-10 hover:bg-cyan-400" to="/">
         Home
       </Link>
-    </div>
-  );
-}
-
-function Logout() {
-  return (
-    <form action="/auth/web/logout" method="POST">
-      <button className="rounded bg-cyan-200 p-4">Logout</button>
-    </form>
-  );
-}
-
-function Login() {
-  const [submitted, setSubmitted] = React.useState(false);
-
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const target = e.target as HTMLFormElement;
-    const formData = new FormData(target);
-    const email = formData.get("email") as string;
-
-    fetch("/auth/web/login", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then(() => setSubmitted(true))
-      .catch((err) => console.error(err));
-  }
-
-  const form = (
-    <form onSubmit={onSubmit} className="flex w-full max-w-md flex-col gap-2">
-      <input
-        className="w-full appearance-none rounded-md border border-gray-300 p-2"
-        id="email"
-        type="email"
-        placeholder="Enter your email"
-        name="email"
-      />
-      <button type="submit" tabIndex={0} className="rounded-md border border-gray-300 bg-cyan-200 p-2">
-        Submit
-      </button>
-    </form>
-  );
-
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3">
-      {submitted ? (
-        <div>
-          <div className="text-lg">Submitted</div>
-          <Link to="/">Back</Link>
-        </div>
-      ) : (
-        form
-      )}
     </div>
   );
 }

@@ -114,10 +114,10 @@ public class AuthService implements HttpService {
 
   private void register(ServerRequest request, ServerResponse response) {
     UserForm userForm = request.content().as(UserForm.class);
+    Validate.fields(userForm);
+
     userRepository.createUser(userForm);
-
     generateAndSendMagicLink(userForm.email());
-
     response.status(Status.CREATED_201).send();
   }
 }
