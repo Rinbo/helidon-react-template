@@ -7,8 +7,12 @@
 - [x] Pagination (improved version)
 - [x] Authentication (magic link)
 - [x] Authorization
-- [ ] Frontend layout
+- [x] Fix react-router browser router
 - [ ] Authentication provider
+  - [ ] Registration component that can be called from anywhere as a modal or embedded
+  - [ ] Login component that can be called from anywhere as a modal or embedded
+- [ ] Frontend layout
+- [ ] Implement awesome navigation
 - [ ] Toast
 
 Sample Helidon SE project that includes multiple REST operations.

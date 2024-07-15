@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, Link, Navigate, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
+import { createBrowserRouter, Link, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
 import "./index.css";
 import Landing from "./views/landing.tsx";
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
+import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 
 const router = createBrowserRouter([
   {
@@ -30,8 +31,13 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/authenticate",
+    path: "/verify",
     element: <Authenticate />,
+  },
+  {
+    path: "/register",
+    element: <RegistrationView />,
+    action: registrationAction,
   },
 ]);
 
@@ -104,7 +110,7 @@ function Login() {
         placeholder="Enter your email"
         name="email"
       />
-      <button type="submit" className="rounded-md border border-gray-300 bg-cyan-200 p-2">
+      <button type="submit" tabIndex={0} className="rounded-md border border-gray-300 bg-cyan-200 p-2">
         Submit
       </button>
     </form>
@@ -129,6 +135,8 @@ function Authenticate() {
   const navigate = useNavigate();
   const [error, setError] = React.useState(false);
 
+  console.log("I AM IN AUTHENTICATE");
+
   const email = searchParams.get("email");
   const token = searchParams.get("token");
 
@@ -151,7 +159,7 @@ function Authenticate() {
       });
   }, [email, navigate, token]);
 
-  if (!token || !email) return <Navigate to={"/"} />;
+  //if (!token || !email) return <Navigate to={"/"} />;
 
   if (error) {
     return <div className="text-lg text-red-400">Authentication failed</div>;

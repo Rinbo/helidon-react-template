@@ -16,6 +16,7 @@ import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
+import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
 import io.helidon.http.HeaderNames;
@@ -57,6 +58,7 @@ public class AuthService implements HttpService {
     rules.post("/authenticate", this::authenticate);
     rules.post("/logout", this::logout);
     rules.get("/principal", this::fetchPrincipal);
+    rules.post("/register", this::register);
   }
 
   private void authenticate(ServerRequest request, ServerResponse response) {
@@ -80,16 +82,20 @@ public class AuthService implements HttpService {
         .ifPresentOrElse(response::send, () -> response.status(Status.UNAUTHORIZED_401).send());
   }
 
+  private void generateAndSendMagicLink(String email) {
+    UUID uuid = authRepository.generateAndGetLoginToken(email);
+
+    String frontendUrl = Config.global().get("app.frontend.url").asString().orElseThrow();
+    logger.info("SENDING MAGIC LINK TO {}: {}/verify?token={}&email={}", email, frontendUrl, uuid, email);
+  }
+
   private void login(ServerRequest request, ServerResponse response) {
     LoginForm loginForm = request.content().as(LoginForm.class);
     Validate.fields(loginForm);
 
     String email = loginForm.email();
     userRepository.findByEmail(email).orElseThrow();
-    UUID uuid = authRepository.generateAndGetLoginToken(email);
-
-    String frontendUrl = Config.global().get("app.frontend.url").asString().orElseThrow();
-    logger.info("SENDING MAGIC LINK TO {}: {}/authenticate?token={}&email={}", email, frontendUrl, uuid, email);
+    generateAndSendMagicLink(email);
 
     response.status(Status.CREATED_201).send();
   }
@@ -104,5 +110,14 @@ public class AuthService implements HttpService {
     response.headers().addCookie(SessionUtils.createLogoutCookie());
     response.headers().add(HeaderNames.LOCATION, "/");
     response.status(Status.FOUND_302).send();
+  }
+
+  private void register(ServerRequest request, ServerResponse response) {
+    UserForm userForm = request.content().as(UserForm.class);
+    userRepository.createUser(userForm);
+
+    generateAndSendMagicLink(userForm.email());
+
+    response.status(Status.CREATED_201).send();
   }
 }

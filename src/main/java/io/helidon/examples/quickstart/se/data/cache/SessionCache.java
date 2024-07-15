@@ -32,7 +32,7 @@ public class SessionCache {
   public void invalidate(UUID uuid) {
     Objects.requireNonNull(uuid, "UUID cannot be null");
 
-    logger.debug("invalidating session {}", uuid);
+    logger.debug("invalidating cached session {}", uuid);
 
     cache.invalidate(uuid);
   }

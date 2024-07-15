@@ -1,6 +1,7 @@
 package io.helidon.examples.quickstart.se.data.repository;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -75,6 +76,26 @@ public class SessionRepository {
         row.column("user_id").getInt(),
         row.column("expires").get(ZonedDateTime.class)
     );
+  }
+
+  public void cleanUpSessions() {
+    Instant startTime = clock.instant();
+    long deleteCount = 0;
+
+    try {
+      dbClient.execute()
+          .createQuery("SELECT id FROM sessions WHERE expires < NOW()")
+          .execute()
+          .map(row -> row.column("id").getString())
+          .map(UUID::fromString)
+          .forEach(sessionCache::invalidate);
+
+      deleteCount = dbClient.execute().createDelete("DELETE FROM sessions WHERE expires < NOW()").execute();
+    } catch (RuntimeException e) {
+      logger.error("failed to cleanup sessions", e);
+    } finally {
+      logger.debug("clean up {} sessions. Time taken: {}", deleteCount, Duration.between(startTime, clock.instant()));
+    }
   }
 
   public Optional<Session> createForUser(User user, String userAgent) {

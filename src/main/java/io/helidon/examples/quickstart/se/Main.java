@@ -24,6 +24,7 @@ import io.helidon.common.media.type.MediaTypes;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
+import io.helidon.examples.quickstart.se.data.cleanup.DbCleanUpRunner;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
@@ -76,25 +77,25 @@ public class Main {
 
   static void setup(Config config) {
     Config.global(config);
-
     Config dbConfig = config.get("db");
     registerDbClient(dbConfig);
     runFlywayMigration(dbConfig);
 
     registerValidator();
 
-    AuthRepository authRepository = new AuthRepository();
     registerCaches();
-    registerRepositories(authRepository);
-    configureScheduledJobs(authRepository);
+    registerRepositories();
+    configureScheduledJobs();
   }
 
-  private static void configureScheduledJobs(AuthRepository authRepository) {
+  private static void configureScheduledJobs() {
+    DbCleanUpRunner dbCleanUpRunner = new DbCleanUpRunner();
+
     Scheduling.fixedRate()
         .delay(10)
         .initialDelay(5)
         .timeUnit(TimeUnit.MINUTES)
-        .task(invocation -> authRepository.cleanUpTokens())
+        .task(invocation -> dbCleanUpRunner.cleanUp())
         .build();
   }
 
@@ -135,9 +136,9 @@ public class Main {
     Contexts.globalContext().register(dbClient);
   }
 
-  private static void registerRepositories(AuthRepository authRepository) {
+  private static void registerRepositories() {
     Context context = Contexts.globalContext();
-    context.register(authRepository);
+    context.register(new AuthRepository());
     context.register(new UserRepository());
     context.register(new SessionRepository());
   }

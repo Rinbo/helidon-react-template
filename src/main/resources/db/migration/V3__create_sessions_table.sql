@@ -8,3 +8,5 @@ CREATE TABLE sessions
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE INDEX expires_ix on sessions (expires);
