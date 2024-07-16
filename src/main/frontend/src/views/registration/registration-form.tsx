@@ -16,9 +16,6 @@ export default function RegistrationForm() {
   const fetcher = useFetcher();
   const { register, handleSubmit, formState } = useForm<Schema>({ resolver: zodResolver(schema) });
 
-  const data = fetcher.data;
-  console.log(data?.error, "FETCHER ERROR");
-
   function onSubmit(data: Schema) {
     fetcher.submit(data, { method: "post", action: "/register", encType: "application/json" });
   }

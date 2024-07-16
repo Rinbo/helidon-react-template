@@ -5,7 +5,7 @@ export default function LogoutForm() {
 
   return (
     <fetcher.Form action="/logout" method="post">
-      <button className="rounded bg-cyan-200 p-4">Logout</button>
+      <button className="btn btn-ghost">Logout</button>
     </fetcher.Form>
   );
 }

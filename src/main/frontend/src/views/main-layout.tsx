@@ -6,7 +6,7 @@ export default function MainLayout() {
 
   // TODO based on handle data, I should be able to redirect before outlet is rendered right?
   return (
-    <main className="flex grow flex-col">
+    <main className="flex grow flex-col p-2 sm:p-4">
       <div>HEADER</div>
       <div className="grow">
         <Outlet context={principal} />

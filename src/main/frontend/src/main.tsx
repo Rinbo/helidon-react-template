@@ -9,6 +9,7 @@ import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import AuthenticationView, { loader as authLoader } from "./views/authenticate/authentication-view.tsx";
 import AboutView from "./views/about/about-view.tsx";
 import React from "react";
+import PollView from "./views/poll/poll-view.tsx";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
         path: "/verify",
         loader: authLoader,
         element: <AuthenticationView />,
+      },
+      {
+        path: "/poll",
+        element: <PollView />,
       },
       {
         path: "/register",

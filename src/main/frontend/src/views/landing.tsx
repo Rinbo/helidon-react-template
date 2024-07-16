@@ -1,6 +1,7 @@
 import { Link, useOutletContext } from "react-router-dom";
 import RegistrationForm from "./registration/registration-form.tsx";
 import { Principal } from "../auth/auth.ts";
+import LogoutForm from "./logout/logout-form.tsx";
 
 export default function Landing() {
   const principal = useOutletContext<Principal>();
@@ -10,10 +11,10 @@ export default function Landing() {
       <h1 className="font-mono text-4xl font-bold md:text-5xl">borjessons.dev</h1>
 
       {!principal && <RegistrationForm />}
-      <Link className="btn btn-primary" to="/about">
+      <Link className="link-info" to="/about">
         About
       </Link>
-      <Link to={"/login"}>Login</Link>
+      {principal ? <LogoutForm /> : <Link to={"/login"}>Login</Link>}
     </section>
   );
 }
