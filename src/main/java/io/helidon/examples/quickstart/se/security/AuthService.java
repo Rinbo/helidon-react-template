@@ -77,11 +77,16 @@ public class AuthService implements HttpService {
     response.send(user);
   }
 
+  /**
+   * Unauthenticated route since we don't want ugly errors in frontend if user is not logged in
+   */
   private void fetchPrincipal(ServerRequest request, ServerResponse response) {
-    request.context().get(Principal.class)
-        .map(Principal::id)
-        .map(userRepository::findByEmail)
-        .ifPresentOrElse(response::send, () -> response.status(Status.UNAUTHORIZED_401).send());
+    SessionUtils.getSessionIdOption(request.headers().get(HeaderNames.COOKIE).allValues())
+        .map(UUID::fromString)
+        .flatMap(sessionRepository::findById)
+        .map(Session::userId)
+        .flatMap(userRepository::findById)
+        .ifPresentOrElse(response::send, response::send);
   }
 
   private void generateAndSendMagicLink(String email) {
