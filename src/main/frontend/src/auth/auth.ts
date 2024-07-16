@@ -3,14 +3,22 @@ import { fetcher } from "../utils/http.ts";
 export type Role = "ADMIN" | "USER" | "WEBMASTER";
 export type Principal = { name: string; email: string; roles: Role[] };
 
+type AuthenticationDetails = { email: string; token: string };
+
 interface AuthProvider {
   principal: Principal | null;
+  authenticate(details: AuthenticationDetails): Promise<void>;
   logout(): Promise<void>;
   fetchPrincipal(): Promise<void>;
+  isAuthenticated(): Promise<boolean>;
 }
 
 export const authProvider: AuthProvider = {
   principal: null,
+  async authenticate(details: AuthenticationDetails) {
+    const response = await fetcher({ path: `/auth/web/authenticate?${new URLSearchParams(details)}`, body: details, method: "POST" });
+    authProvider.principal = (await response.json()) satisfies Principal;
+  },
   async logout() {
     await fetcher({ path: "/auth/web/logout", method: "POST" });
     authProvider.principal = null;
@@ -22,5 +30,10 @@ export const authProvider: AuthProvider = {
     } catch (error) {
       console.info("No active session");
     }
+  },
+  async isAuthenticated(): Promise<boolean> {
+    if (authProvider.principal) return true;
+    await authProvider.fetchPrincipal();
+    return !!authProvider.principal;
   },
 };

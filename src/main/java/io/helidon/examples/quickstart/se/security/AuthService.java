@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
+import io.helidon.common.media.type.MediaTypes;
 import io.helidon.config.Config;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
@@ -72,7 +73,8 @@ public class AuthService implements HttpService {
     Session session = sessionRepository.createForUser(user, userAgent).orElseThrow(() -> new HttpException("unauthorized", Status.UNAUTHORIZED_401));
 
     response.headers().addCookie(SessionUtils.createCookie(session));
-    response.send();
+    response.headers().contentType(MediaTypes.APPLICATION_JSON);
+    response.send(user);
   }
 
   private void fetchPrincipal(ServerRequest request, ServerResponse response) {

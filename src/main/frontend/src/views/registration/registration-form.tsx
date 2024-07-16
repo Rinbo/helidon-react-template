@@ -31,7 +31,7 @@ export default function RegistrationForm() {
       <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-2">
         <TextInput register={register("name")} error={formState.errors.name?.message} placeholder="John Smith" />
         <TextInput register={register("email")} error={formState.errors.email?.message} placeholder="name@example.com" />
-        <button tabIndex={0} disabled={fetcher.state === "submitting"} className="btn btn-primary mt-2">
+        <button tabIndex={0} disabled={fetcher.state !== "idle"} className="btn btn-primary mt-2">
           Register
         </button>
       </fetcher.Form>

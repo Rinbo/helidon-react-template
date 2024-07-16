@@ -27,7 +27,7 @@ export default function LoginForm() {
       <h1 className="text-lg uppercase">Login</h1>
       <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-md flex-col gap-2">
         <TextInput register={register("email")} error={formState.errors.email?.message} placeholder="name@example.com" />
-        <button disabled={fetcher.state === "submitting"} type="submit" tabIndex={0} className="btn btn-primary mt-2">
+        <button disabled={fetcher.state !== "idle"} type="submit" tabIndex={0} className="btn btn-primary mt-2">
           Submit
         </button>
       </fetcher.Form>
