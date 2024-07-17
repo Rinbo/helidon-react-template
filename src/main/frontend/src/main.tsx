@@ -11,6 +11,7 @@ import AboutView from "./views/about/about-view.tsx";
 import React from "react";
 import PollView from "./views/poll/poll-view.tsx";
 
+// TODO Add error fallback boundary
 const router = createBrowserRouter([
   {
     path: "/",
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "/poll",
         element: <PollView />,
+        async loader() {
+          if (await authProvider.isAuthenticated()) return redirect("/");
+          return null;
+        },
       },
       {
         path: "/register",
@@ -61,6 +66,6 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />,
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

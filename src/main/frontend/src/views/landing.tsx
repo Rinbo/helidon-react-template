@@ -1,10 +1,10 @@
-import { Link, useOutletContext } from "react-router-dom";
+import { Link } from "react-router-dom";
 import RegistrationForm from "./registration/registration-form.tsx";
-import { Principal } from "../auth/auth.ts";
 import LogoutForm from "./logout/logout-form.tsx";
+import { useAuth } from "./main-layout.tsx";
 
 export default function Landing() {
-  const principal = useOutletContext<Principal>();
+  const { principal } = useAuth();
 
   return (
     <section className="flex h-full flex-col items-center justify-center gap-4">

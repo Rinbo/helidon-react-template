@@ -2,11 +2,12 @@ import { fetcher } from "../utils/http.ts";
 
 export type Role = "ADMIN" | "USER" | "WEBMASTER";
 export type Principal = { name: string; email: string; roles: Role[] };
+export type PrincipalOption = Principal | null;
 
 type AuthenticationDetails = { email: string; token: string };
 
 interface AuthProvider {
-  principal: Principal | null;
+  principal: PrincipalOption;
   authenticate(details: AuthenticationDetails): Promise<void>;
   logout(): Promise<void>;
   fetchPrincipal(): Promise<void>;
