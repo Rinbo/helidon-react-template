@@ -29,6 +29,7 @@ import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.dto.ErrorResponse;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
@@ -71,8 +72,7 @@ public class Main {
         .register("/api/v1", new UserService())
         .register(StaticContentService.builder("/web").welcomeFileName("index.html").build())
         .register("/{+path}", rules -> rules.get(Main::serveReactApp))
-        .error(ConstraintViolationException.class, Main::handleBadArgument)
-        .error(NoSuchElementException.class, Main::handleNotFound);
+        .error(Exception.class, Main::handleException);
   }
 
   static void setup(Config config) {
@@ -111,14 +111,14 @@ public class Main {
     return new HikariDataSource(hikariConfig);
   }
 
-  private static void handleBadArgument(ServerRequest req, ServerResponse res, ConstraintViolationException ex) {
-    res.status(Status.BAD_REQUEST_400);
-    res.send("Unable to parse request. Message: " + ex.getMessage());
-  }
-
-  private static void handleNotFound(ServerRequest req, ServerResponse res, NoSuchElementException ex) {
-    res.status(Status.NOT_FOUND_404);
-    res.send("No such element: " + ex.getMessage());
+  private static void handleException(ServerRequest req, ServerResponse res, Exception exception) {
+    res.headers().contentType(MediaTypes.APPLICATION_JSON);
+    
+    switch (exception) {
+      case ConstraintViolationException e -> res.status(Status.BAD_REQUEST_400).send(ErrorResponse.of("Unable to parse request", e.getMessage()));
+      case NoSuchElementException e -> res.status(Status.NOT_FOUND_404).send(ErrorResponse.of("Unable to find request", e.getMessage()));
+      default -> res.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("internal server error", exception.getMessage()));
+    }
   }
 
   private static void registerCaches() {
