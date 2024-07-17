@@ -8,18 +8,18 @@ import RegistrationView, { action as registrationAction } from "./views/registra
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import AuthenticationView, { loader as authLoader } from "./views/authenticate/authentication-view.tsx";
 import AboutView from "./views/about/about-view.tsx";
-import React from "react";
 import PollView from "./views/poll/poll-view.tsx";
+import React from "react";
 
 // TODO Add error fallback boundary
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <MainLayout />,
     async loader() {
       await authProvider.fetchPrincipal();
       return { principal: authProvider.principal };
     },
-    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -33,6 +33,7 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginView />,
+        loader: redirectIfAuthenticated,
         action: loginAction,
       },
       {
@@ -43,10 +44,7 @@ const router = createBrowserRouter([
       {
         path: "/poll",
         element: <PollView />,
-        async loader() {
-          if (await authProvider.isAuthenticated()) return redirect("/");
-          return null;
-        },
+        loader: redirectIfAuthenticated,
       },
       {
         path: "/register",
@@ -69,3 +67,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <RouterProvider router={router} />
   </React.StrictMode>,
 );
+
+export async function redirectIfAuthenticated() {
+  if (await authProvider.isAuthenticated()) return redirect("/");
+  return null;
+}
