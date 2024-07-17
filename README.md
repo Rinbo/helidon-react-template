@@ -8,7 +8,7 @@
 - [x] Authentication (magic link)
 - [x] Authorization
 - [x] Fix react-router browser router
-- [ ] Authentication provider
+- [ ] Authentication provider // On second thought I might need to send a code also in case user checks mail on a different device
 - [ ] Frontend layout
 - [ ] Implement awesome navigation
 - [ ] Toast

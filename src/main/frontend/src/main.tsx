@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, LoaderFunction, LoaderFunctionArgs, redirect, RouterProvider } from "react-router-dom";
 import "./index.css";
 import Landing from "./views/landing.tsx";
 import MainLayout from "./views/main-layout.tsx";
@@ -27,6 +27,7 @@ const router = createBrowserRouter([
       },
       {
         path: "about",
+        loader: (args) => requireAuth(args, nullLoader),
         handle: {},
         element: <AboutView />,
       },
@@ -68,7 +69,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   </React.StrictMode>,
 );
 
+export async function requireAuth(args: LoaderFunctionArgs, loader: LoaderFunction) {
+  const isAuthenticated = await authProvider.isAuthenticated();
+  if (!isAuthenticated) return redirect(`/login`);
+  return loader(args);
+}
+
 export async function redirectIfAuthenticated() {
   if (await authProvider.isAuthenticated()) return redirect("/");
+  return null;
+}
+
+async function nullLoader(_args: LoaderFunctionArgs) {
   return null;
 }
