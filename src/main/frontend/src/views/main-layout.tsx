@@ -12,7 +12,7 @@ export default function MainLayout() {
 
   return (
     <AuthContext.Provider value={principal}>
-      <main className="relative flex grow flex-col">
+      <main className="flex grow flex-col">
         <AppHeader />
         <SideBar />
         <div className="grow">
