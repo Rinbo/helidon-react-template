@@ -52,6 +52,7 @@ const router = createBrowserRouter([
         element: <RegistrationView />,
         action: registrationAction,
       },
+      { path: "/profile", element: <div>Profile</div> },
     ],
   },
   {
