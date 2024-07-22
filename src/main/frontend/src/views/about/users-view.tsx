@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 type User = { id: number; email: string; name: string; roles: string[] };
 type ResponseType = User[];
 
-export default function AboutView() {
+export default function UsersView() {
   const [response, setResponse] = React.useState<ResponseType>([]);
 
   React.useEffect(() => {
@@ -42,7 +42,6 @@ function UpdateRoles({ user }: { user: User }) {
     const formData = new FormData(e.target as HTMLFormElement);
 
     const selectedRoles = formData.getAll("role-select") as string[];
-    console.log(selectedRoles);
 
     fetch(`/api/v1/users/${user.id}/roles`, {
       method: "PUT",
@@ -50,7 +49,7 @@ function UpdateRoles({ user }: { user: User }) {
       headers: { "Content-Type": "application/json" },
     }).then((res) => {
       if (res.ok) {
-        console.log("SUCCESS");
+        console.info("SUCCESS");
       } else {
         console.error("ERROR");
       }

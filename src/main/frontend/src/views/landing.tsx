@@ -19,8 +19,8 @@ export default function Landing() {
               organization.
             </p>
             <div className="flex flex-row justify-center gap-4">
-              <Link className="btn btn-primary" to="/about">
-                About
+              <Link className="btn btn-primary" to="/users">
+                Users
               </Link>
               {principal && <LogoutForm className="btn btn-secondary" />}
               {!principal && (

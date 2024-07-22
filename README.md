@@ -14,7 +14,7 @@
 - [ ] Toast
 - [ ] User cache
 
-1. Fix user menu with gravatar in top right corner - logout, profile, theme
+1. ~~Fix user menu with gravatar in top right corner - logout, profile, theme~~
 2. Add handle thing for iterating over and creating sidebar
 3. Make use of above to make a large dropdown menu when clicking on the company logo. Or make some app thingy next to the gravatar, or just use that one
 4. Fix login to use login code instead - grab the code you wrote in medborgare.
