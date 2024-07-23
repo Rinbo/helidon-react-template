@@ -4,8 +4,6 @@ import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
 import UsersView from "./views/about/users-view.tsx";
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
-import AuthenticationView, { loader as authLoader } from "./views/authenticate/authentication-view.tsx";
-import PollView from "./views/poll/poll-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 
 export type MenuItem = Handle & { path: string };
@@ -49,17 +47,8 @@ export const routes: RouteObject[] = [
         action: loginAction,
       },
       {
-        path: "/verify",
-        loader: authLoader,
-        element: <AuthenticationView />,
-      },
-      {
-        path: "/poll",
-        element: <PollView />,
-        loader: redirectIfAuthenticated,
-      },
-      {
         path: "/register",
+        loader: redirectIfAuthenticated,
         element: <RegistrationView />,
         action: registrationAction,
       },

@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.OptionalLong;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +12,10 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbTransaction;
+import io.helidon.examples.quickstart.se.data.model.Passcode;
 
 public class AuthRepository {
-  private static final long LOGIN_TOKEN_VALIDITY_PERIOD = 1000 * 60 * 5;
+  private static final long LOGIN_PASSCODE_VALIDITY_PERIOD = 1000 * 60 * 5;
   private static final Logger logger = LoggerFactory.getLogger(AuthRepository.class);
 
   private final DbClient dbClient;
@@ -41,7 +41,7 @@ public class AuthRepository {
     try {
       DbTransaction transaction = dbClient.transaction();
       rowCount = transaction
-          .createDelete("DELETE FROM login_token WHERE expiry < :now")
+          .createDelete("DELETE FROM login_passcode WHERE expiry < :now")
           .addParam("now", now.toEpochMilli())
           .execute();
       transaction.commit();
@@ -52,34 +52,35 @@ public class AuthRepository {
     }
   }
 
-  public UUID generateAndGetLoginToken(String email) {
+  public Passcode generateAndGetLoginPasscode(String email) {
     Objects.requireNonNull(email, "email must not be null");
 
     DbTransaction transaction = dbClient.transaction();
 
-    transaction.createDelete("DELETE FROM login_token WHERE email = :email")
+    transaction.createDelete("DELETE FROM login_passcode WHERE email = :email")
         .addParam("email", email)
         .execute();
 
-    UUID uuid = UUID.randomUUID();
-    long updateCount = transaction.createInsert("INSERT INTO login_token (token, email, expiry) VALUES (:token, :email, :expiry)")
-        .addParam("token", uuid.toString())
+    Passcode passcode = Passcode.create();
+
+    long updateCount = transaction.createInsert("INSERT INTO login_passcode (passcode, email, expiry) VALUES (:passcode, :email, :expiry)")
+        .addParam("passcode", passcode.value())
         .addParam("email", email)
-        .addParam("expiry", clock.instant().toEpochMilli() + LOGIN_TOKEN_VALIDITY_PERIOD)
+        .addParam("expiry", clock.instant().toEpochMilli() + LOGIN_PASSCODE_VALIDITY_PERIOD)
         .execute();
 
     transaction.commit();
 
-    if (updateCount != 1) throw new IllegalStateException("token generation failed for email: " + email);
+    if (updateCount != 1) throw new IllegalStateException("passcode generation failed for email: " + email);
 
-    return uuid;
+    return passcode;
   }
 
-  public boolean isValidLoginToken(String email, String token) {
+  public boolean isValidLoginPasscode(String email, Passcode passcode) {
     OptionalLong expiryOption = dbClient.execute()
-        .createQuery("SELECT * FROM login_token WHERE email = :email AND token = :token")
+        .createQuery("SELECT * FROM login_passcode WHERE email = :email AND passcode = :passcode")
         .addParam("email", email)
-        .addParam("token", token)
+        .addParam("passcode", passcode.value())
         .execute()
         .mapToLong(dbRow -> dbRow.column("expiry").getLong())
         .findFirst();

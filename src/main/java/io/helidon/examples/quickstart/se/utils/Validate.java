@@ -1,5 +1,6 @@
 package io.helidon.examples.quickstart.se.utils;
 
+import java.util.Objects;
 import java.util.Set;
 
 import io.helidon.common.context.Contexts;
@@ -17,5 +18,10 @@ public final class Validate {
     if (errors.isEmpty()) return;
 
     throw new ConstraintViolationException(errors);
+  }
+
+  public static void passcode(String value) {
+    Objects.requireNonNull(value, "value must not be null");
+    if (!value.matches("\\d{6}")) throw new IllegalArgumentException("passcode must be a number of 6 digits");
   }
 }

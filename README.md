@@ -8,11 +8,15 @@
 - [x] Authentication (magic link)
 - [x] Authorization
 - [x] Fix react-router browser router
-- [ ] Authentication provider // On second thought I might need to send a code also in case user checks mail on a different device
-- [ ] Frontend layout
-- [ ] Implement awesome navigation
+- [ ] Login with code instead of magic link.
+- [x] Frontend layout
+- [x] Implement awesome navigation
 - [ ] Toast
 - [ ] User cache
+- [ ] Error boundary
+- [ ] Theme change?
+- [ ] TLS locally?
+
 
 1. ~~Fix user menu with gravatar in top right corner - logout, profile, theme~~
 2. Add handle thing for iterating over and creating sidebar

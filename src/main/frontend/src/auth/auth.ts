@@ -4,7 +4,7 @@ export type Role = "ADMIN" | "USER" | "WEBMASTER";
 export type Principal = { name: string; email: string; roles: Role[] };
 export type PrincipalOption = Principal | null;
 
-type AuthenticationDetails = { email: string; token: string };
+type AuthenticationDetails = { email: string; passcode: string };
 
 interface AuthProvider {
   principal: PrincipalOption;
@@ -18,6 +18,7 @@ export const authProvider: AuthProvider = {
   principal: null,
   async authenticate(details: AuthenticationDetails) {
     const response = await fetcher({ path: `/auth/web/authenticate?${new URLSearchParams(details)}`, body: details, method: "POST" });
+    if (!response.ok) throw new Error("Authentication failed.");
     authProvider.principal = (await response.json()) satisfies Principal;
   },
   async logout() {

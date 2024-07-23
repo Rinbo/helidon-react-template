@@ -32,8 +32,10 @@ export default function RegistrationForm() {
           Register
         </button>
       </fetcher.Form>
-      <div className="mt-2">
-        Already have an account? Please{" "}
+      <div className="mt-2 text-center">
+        Already have an account?
+        <br />
+        Please{" "}
         <span>
           <Link className="link-info" to="/login">
             login here

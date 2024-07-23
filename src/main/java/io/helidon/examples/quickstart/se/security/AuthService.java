@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
 import io.helidon.common.media.type.MediaTypes;
-import io.helidon.config.Config;
+import io.helidon.examples.quickstart.se.data.model.Passcode;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
@@ -64,9 +64,9 @@ public class AuthService implements HttpService {
 
   private void authenticate(ServerRequest request, ServerResponse response) {
     String email = request.prologue().query().first("email").orElseThrow(() -> new HttpException("email missing", Status.BAD_REQUEST_400));
-    String loginToken = request.prologue().query().first("token").orElseThrow(() -> new HttpException("login-token missing", Status.BAD_REQUEST_400));
+    String passcode = request.prologue().query().first("passcode").orElseThrow(() -> new HttpException("passcode missing", Status.BAD_REQUEST_400));
 
-    if (!authRepository.isValidLoginToken(email, loginToken)) throw new HttpException("login-token validation failed", Status.UNAUTHORIZED_401);
+    if (!authRepository.isValidLoginPasscode(email, Passcode.of(passcode))) throw new HttpException("passcode validation failed", Status.UNAUTHORIZED_401);
 
     User user = userRepository.findByEmail(email).orElseThrow();
     String userAgent = request.headers().get(HeaderNames.USER_AGENT).asOptional().orElse("unknown");
@@ -90,10 +90,9 @@ public class AuthService implements HttpService {
   }
 
   private void generateAndSendMagicLink(String email) {
-    UUID uuid = authRepository.generateAndGetLoginToken(email);
+    Passcode passcode = authRepository.generateAndGetLoginPasscode(email);
 
-    String frontendUrl = Config.global().get("app.frontend.url").asString().orElseThrow();
-    logger.info("SENDING MAGIC LINK TO {}: {}/verify?token={}&email={}", email, frontendUrl, uuid, email);
+    logger.info("SENDING PASSCODE {} TO {}: ", passcode, email);
   }
 
   private void login(ServerRequest request, ServerResponse response) {

@@ -1,17 +1,18 @@
 import { json, Link, LoaderFunctionArgs, redirect, useLoaderData } from "react-router-dom";
 import { authProvider } from "../../auth/auth.ts";
 
+// TODO Remove when keycode implementation is stable -  Currently not in use
 export async function loader({ request }: LoaderFunctionArgs) {
   if (await authProvider.isAuthenticated()) return redirect("/");
 
   const searchParams = new URLSearchParams(new URL(request.url).search);
   const email = searchParams.get("email");
-  const token = searchParams.get("token");
+  const passcode = searchParams.get("passcode");
 
-  if (!token || !email) return json({ error: "Missing login credentials. Please try logging in again." });
+  if (!passcode || !email) return json({ error: "Missing login credentials. Please try logging in again." });
 
   try {
-    await authProvider.authenticate({ email, token });
+    await authProvider.authenticate({ email, passcode });
   } catch (error) {
     console.error(error, "Authentication failed");
     return json({ error: "Authentication failed" });

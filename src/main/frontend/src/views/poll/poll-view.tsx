@@ -2,6 +2,7 @@ import React from "react";
 import { authProvider } from "../../auth/auth.ts";
 import { Link, useNavigate, useRevalidator } from "react-router-dom";
 
+// TODO Remove when keycode implementation is stable -  Currently not in use
 export default function PollView() {
   const count = React.useRef(0);
   const [error, setError] = React.useState<boolean>(false);
