@@ -1,34 +1,26 @@
-import { Link, NavLink, Outlet, useLoaderData } from "react-router-dom";
+import { Link, NavLink, Outlet, useRouteLoaderData } from "react-router-dom";
 import { PrincipalOption } from "../auth/auth.ts";
-import React, { createContext, useContext } from "react";
+import React from "react";
 import AppLogo from "../components/navigation/app-logo.tsx";
 import { IoAppsOutline } from "react-icons/io5";
 import LogoutForm from "./logout/logout-form.tsx";
 import { MenuItem, menuItems } from "../routes.tsx";
 import { iconLib } from "../utils/icon-lib.ts";
 
-type AuthContextType = { principal: PrincipalOption };
-const AuthContext = createContext<AuthContextType>(null!);
-
 export function useAuth() {
-  return useContext(AuthContext);
+  return useRouteLoaderData("root") as { principal: PrincipalOption };
 }
 
-// TODO AuthProvider can be replaced by simply using useRouteLoaderData instead
 export default function MainLayout() {
-  const principal = useLoaderData() as AuthContextType;
-
   return (
-    <AuthContext.Provider value={principal}>
-      <main className="flex grow flex-col p-2">
-        <AppHeader />
-        <SideBar />
-        <div className="grow sm:container">
-          <Outlet />
-        </div>
-        <div className="py-2 text-center font-mono text-sm">borjesson.dev</div>
-      </main>
-    </AuthContext.Provider>
+    <main className="flex grow flex-col p-2">
+      <AppHeader />
+      <SideBar />
+      <div className="grow sm:container">
+        <Outlet />
+      </div>
+      <div className="py-2 text-center font-mono text-sm">borjesson.dev</div>
+    </main>
   );
 }
 
@@ -99,7 +91,7 @@ function AppMenu() {
       <div role="button" tabIndex={0} className="btn btn-ghost p-1">
         <IoAppsOutline className="text-3xl text-primary sm:text-4xl" />
       </div>
-      <div tabIndex={0} className="menu dropdown-content z-[1] mt-2 w-screen max-w-sm rounded-box bg-base-300 p-2 shadow sm:max-w-xl">
+      <div tabIndex={0} className="menu dropdown-content z-[1] mt-2 w-screen max-w-xs rounded-box bg-base-300 p-2 shadow sm:max-w-xl">
         <div className="divider px-10 py-2 font-mono">borjessons.dev</div>
 
         <div className="row flex flex-wrap justify-center gap-4 p-4">

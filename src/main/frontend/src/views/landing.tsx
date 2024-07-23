@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import LogoutForm from "./logout/logout-form.tsx";
 import { useAuth } from "./main-layout.tsx";
 import { HiTemplate } from "react-icons/hi";
+import React from "react";
 
 export default function Landing() {
   const { principal } = useAuth();
@@ -24,9 +25,14 @@ export default function Landing() {
               </Link>
               {principal && <LogoutForm className="btn btn-secondary" />}
               {!principal && (
-                <Link className="btn btn-secondary" to={"/login"}>
-                  Login
-                </Link>
+                <React.Fragment>
+                  <Link className="btn btn-info" to={"/login"}>
+                    Login
+                  </Link>
+                  <Link className="btn btn-secondary" to={"/register"}>
+                    Register
+                  </Link>
+                </React.Fragment>
               )}
             </div>
           </div>

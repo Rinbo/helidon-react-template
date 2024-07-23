@@ -29,10 +29,10 @@ export default function PollView() {
   if (error)
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
-        <h1 className="text-3xl text-warning">Something went wrong</h1>
-        <p>Please try again later</p>
-        <Link to="/" className={"link"}>
-          Home
+        <h1 className="text-3xl text-warning">Your login link has timed out</h1>
+        <p>Please go back to apply for another one</p>
+        <Link to="/login" className={"link"}>
+          Login
         </Link>
       </div>
     );

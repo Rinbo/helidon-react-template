@@ -12,8 +12,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function RegistrationView() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
-      <div>REGISTRATION VIEW</div>
+    <div className="flex h-full flex-col items-center justify-center gap-4 p-2">
       <RegistrationForm />
     </div>
   );

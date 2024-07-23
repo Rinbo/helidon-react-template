@@ -1,5 +1,5 @@
 import { MdOutlineJoinInner } from "react-icons/md";
-import { useFetcher } from "react-router-dom";
+import { Link, useFetcher } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,14 @@ export default function RegistrationForm() {
           Register
         </button>
       </fetcher.Form>
+      <div className="mt-2">
+        Already have an account? Please{" "}
+        <span>
+          <Link className="link-info" to="/login">
+            login here
+          </Link>
+        </span>
+      </div>
     </div>
   );
 }

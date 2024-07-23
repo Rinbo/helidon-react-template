@@ -9,5 +9,9 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function LoginView() {
-  return <LoginForm />;
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
+      <LoginForm />
+    </div>
+  );
 }

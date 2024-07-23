@@ -1,4 +1,4 @@
-import { useFetcher } from "react-router-dom";
+import { Link, useFetcher } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import TextInput from "../../components/form/text-input.tsx";
@@ -22,7 +22,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3">
+    <div className="flex flex-col items-center justify-center gap-4">
       <FaLock size={55} className="text-secondary" />
       <h1 className="text-lg uppercase">Login</h1>
       <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-md flex-col gap-2">
@@ -31,6 +31,14 @@ export default function LoginForm() {
           Submit
         </button>
       </fetcher.Form>
+      <div className="mt-2">
+        Don't have an account yet? Please{" "}
+        <span>
+          <Link className="link-info" to="/register">
+            register here
+          </Link>
+        </span>
+      </div>
     </div>
   );
 }
