@@ -9,6 +9,7 @@
 - [x] Authorization
 - [x] Fix react-router browser router
 - [ ] Login with code instead of magic link.
+  -  [ ] max-retries
 - [x] Frontend layout
 - [x] Implement awesome navigation
 - [ ] Toast

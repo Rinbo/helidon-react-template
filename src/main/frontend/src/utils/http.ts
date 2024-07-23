@@ -16,3 +16,20 @@ export function fetcher({ path, method, body, headers }: Fetcher): Promise<Respo
     },
   });
 }
+
+export async function extractErrorMessage(response: Response): Promise<string> {
+  if (response.headers.get("Content-Type")?.includes("application/json")) {
+    try {
+      const json = await response.json();
+      return json.details || json.message || "Unknown error";
+    } catch {
+      // JSON parsing failed, fall through to text
+    }
+  }
+
+  try {
+    return (await response.text()) || "Unknown error";
+  } catch {
+    return "Unknown error";
+  }
+}

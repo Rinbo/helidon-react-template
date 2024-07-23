@@ -5,7 +5,9 @@ export default function LogoutForm({ className }: { className?: string }) {
 
   return (
     <fetcher.Form action="/logout" method="post">
-      <button className={className}>Logout</button>
+      <button className={className} disabled={fetcher.state !== "idle"}>
+        Logout
+      </button>
     </fetcher.Form>
   );
 }

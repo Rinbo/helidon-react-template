@@ -6,6 +6,7 @@ import { Link, useFetcher } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaLock } from "react-icons/fa";
+import { LoginAction } from "./login-view.tsx";
 
 type Props = {
   setState: React.Dispatch<React.SetStateAction<LoginState>>;
@@ -21,11 +22,16 @@ type Schema = z.infer<typeof schema>;
 export default function EmailInsert({ setState, setEmail }: Props) {
   const fetcher = useFetcher();
   const { register, handleSubmit, formState } = useForm<Schema>({ resolver: zodResolver(schema) });
+  const action = fetcher.data as LoginAction;
+
+  React.useEffect(() => {
+    action?.success && setState("passcode-insert");
+    action?.error && console.log(action.error, "ERROR MESSAGE");
+  }, [action]);
 
   function onSubmit(data: Schema) {
     fetcher.submit(data, { method: "post", action: "/login", encType: "application/json" });
     setEmail(data.email);
-    setState("passcode-insert");
   }
 
   return (

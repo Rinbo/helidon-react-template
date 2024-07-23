@@ -33,6 +33,7 @@ import io.helidon.examples.quickstart.se.dto.ErrorResponse;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
+import io.helidon.http.HttpException;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.scheduling.Scheduling;
@@ -113,10 +114,11 @@ public class Main {
 
   private static void handleException(ServerRequest req, ServerResponse res, Exception exception) {
     res.headers().contentType(MediaTypes.APPLICATION_JSON);
-    
+
     switch (exception) {
       case ConstraintViolationException e -> res.status(Status.BAD_REQUEST_400).send(ErrorResponse.of("Unable to parse request", e.getMessage()));
-      case NoSuchElementException e -> res.status(Status.NOT_FOUND_404).send(ErrorResponse.of("Unable to find request", e.getMessage()));
+      case NoSuchElementException e -> res.status(Status.NOT_FOUND_404).send(ErrorResponse.of("Unable to find resource", e.getMessage()));
+      case HttpException e -> res.status(e.status()).send(ErrorResponse.of(e.getMessage(), e.getMessage()));
       default -> res.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("internal server error", exception.getMessage()));
     }
   }

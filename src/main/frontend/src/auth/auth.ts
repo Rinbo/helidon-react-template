@@ -1,4 +1,4 @@
-import { fetcher } from "../utils/http.ts";
+import { extractErrorMessage, fetcher } from "../utils/http.ts";
 
 export type Role = "ADMIN" | "USER" | "WEBMASTER";
 export type Principal = { name: string; email: string; roles: Role[] };
@@ -18,7 +18,7 @@ export const authProvider: AuthProvider = {
   principal: null,
   async authenticate(details: AuthenticationDetails) {
     const response = await fetcher({ path: `/auth/web/authenticate?${new URLSearchParams(details)}`, body: details, method: "POST" });
-    if (!response.ok) throw new Error("Authentication failed.");
+    if (!response.ok) throw new Error(await extractErrorMessage(response));
     authProvider.principal = (await response.json()) satisfies Principal;
   },
   async logout() {

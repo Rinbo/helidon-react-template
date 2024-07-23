@@ -14,16 +14,22 @@ export default function Keypad({ submit, disabled, reset }: Props) {
   const [keycode, setKeycode] = useState<string[]>(EMPTY_ARRAY);
   const refs = useRef<HTMLInputElement[] | null[]>([]);
 
-  useEffect(() => {
-    refs.current[0]?.focus();
-  }, []);
+  useEffect(() => focusOnFirst(), []);
 
   useEffect(() => {
     reset && onReset();
   }, [reset]);
 
+  useEffect(() => {
+    if (keycode == EMPTY_ARRAY) focusOnFirst();
+  }, [disabled]);
+
   function onReset() {
     setKeycode(EMPTY_ARRAY);
+    focusOnFirst();
+  }
+
+  function focusOnFirst() {
     refs.current[0]?.focus();
   }
 
@@ -68,7 +74,7 @@ export default function Keypad({ submit, disabled, reset }: Props) {
         {keycode.map((value, index) => {
           return (
             <input
-              key={"key-" + index}
+              key={"input-" + index}
               maxLength={1}
               type="text"
               className={`min-w-0 flex-1 rounded border border-gray-300 p-2 text-center text-lg ${disabled && "text-gray-400"}`}

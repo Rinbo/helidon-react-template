@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { LoginState } from "./login-wrapper.tsx";
-import { authProvider } from "../../auth/auth.ts";
-import { useNavigate, useRevalidator } from "react-router-dom";
+import { useFetcher } from "react-router-dom";
 import Keypad from "./keypad.tsx";
 import { FaUnlock } from "react-icons/fa";
 
@@ -11,23 +10,24 @@ type Props = {
 };
 
 export default function PasscodeInsert({ email, setState }: Props) {
-  const [disabled, setDisabled] = useState<boolean>(false);
   const [reset, setReset] = useState<boolean>(false);
-  const navigate = useNavigate();
-  const revalidator = useRevalidator();
+  const fetcher = useFetcher();
+
+  const action = useMemo(() => fetcher.data, [fetcher.data]);
+  const disabled = useMemo(() => fetcher.state !== "idle", [fetcher.state]);
+
+  React.useEffect(() => {
+    action?.error && onError(action.error);
+  }, [action]);
+
+  function onError(message: string) {
+    console.log(message, "AUTH ERROR MESSAGE"); // TODO make use of flash message
+    setReset(true);
+  }
 
   async function submit(passcode: string) {
-    setDisabled(true);
-    try {
-      await authProvider.authenticate({ email, passcode });
-      revalidator.revalidate();
-      navigate("/", { replace: true });
-    } catch (error) {
-      setReset(true);
-      console.error(error, "Authentication failed");
-    } finally {
-      setDisabled(false);
-    }
+    fetcher.submit({ passcode, email }, { method: "post", action: "/authenticate", encType: "application/json" });
+    reset && setReset(false);
   }
 
   return (

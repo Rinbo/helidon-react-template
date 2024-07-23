@@ -1,4 +1,4 @@
-import { LoaderFunction, LoaderFunctionArgs, redirect, RouteObject } from "react-router-dom";
+import { ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect, RouteObject } from "react-router-dom";
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
@@ -47,6 +47,10 @@ export const routes: RouteObject[] = [
         action: loginAction,
       },
       {
+        path: "/authenticate",
+        action: authenticationAction,
+      },
+      {
         path: "/register",
         loader: redirectIfAuthenticated,
         element: <RegistrationView />,
@@ -82,4 +86,13 @@ export async function redirectIfAuthenticated() {
 
 async function nullLoader(_args: LoaderFunctionArgs) {
   return null;
+}
+
+async function authenticationAction({ request }: ActionFunctionArgs) {
+  try {
+    await authProvider.authenticate(await request.json());
+    return redirect("/");
+  } catch (error) {
+    return json({ error: (error as Error)?.message || "Unknown error" });
+  }
 }

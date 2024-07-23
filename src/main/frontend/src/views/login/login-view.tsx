@@ -1,12 +1,14 @@
-import { ActionFunctionArgs, json, redirect } from "react-router-dom";
+import { ActionFunctionArgs, json } from "react-router-dom";
 import { fetcher } from "../../utils/http.ts";
 import LoginWrapper from "./login-wrapper.tsx";
 
 export async function action({ request }: ActionFunctionArgs) {
   const response = await fetcher({ path: "/auth/web/login", method: "POST", body: await request.json() });
-  if (response.ok) return redirect("/poll"); //TODO pass to waiter view
-  return json({ error: "Unable to proceed with login" });
+  if (response.ok) return json({ success: true });
+  return json({ error: "Unable to proceed with login. Try again later." });
 }
+
+export type LoginAction = { success?: boolean; error?: string };
 
 export default function LoginView() {
   return (
