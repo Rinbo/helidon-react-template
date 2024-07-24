@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
 import io.helidon.common.media.type.MediaTypes;
+import io.helidon.examples.quickstart.se.data.model.LoginPasscode;
 import io.helidon.examples.quickstart.se.data.model.Passcode;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
@@ -18,6 +19,7 @@ import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
 import io.helidon.examples.quickstart.se.dto.UserForm;
+import io.helidon.examples.quickstart.se.utils.Either;
 import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
 import io.helidon.http.HeaderNames;
@@ -66,7 +68,9 @@ public class AuthService implements HttpService {
     String email = request.prologue().query().first("email").orElseThrow(() -> new HttpException("email missing", Status.BAD_REQUEST_400));
     String passcode = request.prologue().query().first("passcode").orElseThrow(() -> new HttpException("passcode missing", Status.BAD_REQUEST_400));
 
-    if (!authRepository.isValidLoginPasscode(email, Passcode.of(passcode))) throw new HttpException("passcode validation failed", Status.UNAUTHORIZED_401);
+    Either<IllegalStateException, LoginPasscode> either = authRepository.validatePasscode(email, Passcode.of(passcode));
+
+    if (either.isLeft()) throw new HttpException(either.getLeft().getMessage(), Status.UNAUTHORIZED_401);
 
     User user = userRepository.findByEmail(email).orElseThrow();
     String userAgent = request.headers().get(HeaderNames.USER_AGENT).asOptional().orElse("unknown");

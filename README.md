@@ -8,15 +8,16 @@
 - [x] Authentication (magic link)
 - [x] Authorization
 - [x] Fix react-router browser router
-- [] Login with code instead of magic link.
+- [x] Login with code instead of magic link.
 - [x] Frontend layout
 - [x] Implement awesome navigation
 - [x] Toast
 - [ ] Max retries in login_passcode
 - [ ] User cache
 - [ ] Error boundary
-- [ ] Theme change?
-- [ ] TLS locally?
+- [ ] Db cleanup jobs with FOR UPDATE SKIP LOCKED
+- [ ] Postgres notify
+
 
 
 1. ~~Fix user menu with gravatar in top right corner - logout, profile, theme~~

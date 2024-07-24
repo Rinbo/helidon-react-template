@@ -93,8 +93,8 @@ public class Main {
     DbCleanUpRunner dbCleanUpRunner = new DbCleanUpRunner();
 
     Scheduling.fixedRate()
-        .delay(10)
-        .initialDelay(5)
+        .delay(30)
+        .initialDelay(30)
         .timeUnit(TimeUnit.MINUTES)
         .task(invocation -> dbCleanUpRunner.cleanUp())
         .build();
