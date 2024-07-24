@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaLock } from "react-icons/fa";
 import { LoginAction } from "./login-view.tsx";
+import toast from "react-hot-toast";
 
 type Props = {
   setState: React.Dispatch<React.SetStateAction<LoginState>>;
@@ -25,8 +26,8 @@ export default function EmailInsert({ setState, setEmail }: Props) {
   const action = fetcher.data as LoginAction;
 
   React.useEffect(() => {
+    action?.error && toast.error(action?.error);
     action?.success && setState("passcode-insert");
-    action?.error && console.log(action.error, "ERROR MESSAGE");
   }, [action]);
 
   function onSubmit(data: Schema) {

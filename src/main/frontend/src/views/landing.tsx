@@ -9,16 +9,17 @@ export default function Landing() {
 
   return (
     <section className="flex h-full items-center justify-center">
-      <div className="hero max-w-lg rounded-3xl py-8 text-center sm:px-8">
+      <div className="hero max-w-lg rounded-3xl py-4 text-center sm:px-8">
         <div className="hero-content flex-col">
           <HiTemplate className="text-9xl text-primary" />
           <div>
-            <h1 className="my-10 font-mono text-4xl font-bold md:text-5xl">borjessons.dev</h1>
+            <h1 className="my-8 font-mono text-4xl font-bold md:text-5xl">borjessons.dev</h1>
             <p className="py-6">
               Revolutionize your workflow with <span className="font-mono text-primary">borjessons.dev</span>. Our cutting-edge platform
               integrates seamlessly with your existing tools, boosting productivity and streamlining collaboration across your entire
               organization.
             </p>
+
             <div className="flex flex-row justify-center gap-4">
               <Link className="btn btn-primary" to="/users">
                 Users

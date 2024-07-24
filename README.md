@@ -8,11 +8,11 @@
 - [x] Authentication (magic link)
 - [x] Authorization
 - [x] Fix react-router browser router
-- [ ] Login with code instead of magic link.
-  -  [ ] max-retries
+- [] Login with code instead of magic link.
 - [x] Frontend layout
 - [x] Implement awesome navigation
-- [ ] Toast
+- [x] Toast
+- [ ] Max retries in login_passcode
 - [ ] User cache
 - [ ] Error boundary
 - [ ] Theme change?

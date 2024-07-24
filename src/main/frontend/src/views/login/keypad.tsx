@@ -21,7 +21,7 @@ export default function Keypad({ submit, disabled, reset }: Props) {
   }, [reset]);
 
   useEffect(() => {
-    if (keycode == EMPTY_ARRAY) focusOnFirst();
+    keycode == EMPTY_ARRAY && focusOnFirst();
   }, [disabled]);
 
   function onReset() {

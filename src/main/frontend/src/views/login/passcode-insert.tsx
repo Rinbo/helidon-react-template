@@ -3,6 +3,7 @@ import { LoginState } from "./login-wrapper.tsx";
 import { useFetcher } from "react-router-dom";
 import Keypad from "./keypad.tsx";
 import { FaUnlock } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 type Props = {
   email: string;
@@ -21,7 +22,7 @@ export default function PasscodeInsert({ email, setState }: Props) {
   }, [action]);
 
   function onError(message: string) {
-    console.log(message, "AUTH ERROR MESSAGE"); // TODO make use of flash message
+    toast.error(message);
     setReset(true);
   }
 

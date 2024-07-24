@@ -5,6 +5,7 @@ import Landing from "./views/landing.tsx";
 import UsersView from "./views/about/users-view.tsx";
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
+import toast from "react-hot-toast";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -62,6 +63,7 @@ export const routes: RouteObject[] = [
     path: "/logout",
     async action() {
       await authProvider.logout();
+      toast.success("Goodbye, see you later!");
       return redirect("/");
     },
   },
@@ -91,6 +93,7 @@ async function nullLoader(_args: LoaderFunctionArgs) {
 async function authenticationAction({ request }: ActionFunctionArgs) {
   try {
     await authProvider.authenticate(await request.json());
+    toast.success("Welcome " + authProvider.principal?.name, { duration: 4000 });
     return redirect("/");
   } catch (error) {
     return json({ error: (error as Error)?.message || "Unknown error" });
