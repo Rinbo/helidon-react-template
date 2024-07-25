@@ -2,7 +2,7 @@ CREATE TABLE login_passcode
 (
     id       SERIAL PRIMARY KEY,
     passcode CHAR(6)      NOT NULL,
-    email    VARCHAR(255) NOT NULL,
+    email    VARCHAR(255) UNIQUE NOT NULL,
     expiry   BIGINT       NOT NULL,
     attempts SMALLINT     NOT NULL DEFAULT 0
 );

@@ -12,11 +12,13 @@
 - [x] Frontend layout
 - [x] Implement awesome navigation
 - [x] Toast
-- [ ] Max retries in login_passcode
+- [x] Max retries in login_passcode
+- [x] Write repository integration test for authentication brute force attacks 
 - [ ] User cache
 - [ ] Error boundary
 - [ ] Db cleanup jobs with FOR UPDATE SKIP LOCKED
 - [ ] Postgres notify
+- [ ] Security Integration Test
 
 
 

@@ -21,6 +21,8 @@
     <caffine.version>3.1.8</caffine.version>
     <flyway-core.version>10.15.0</flyway-core.version>
     <helidon-integrations-jdbc.version>4.0.10</helidon-integrations-jdbc.version>
+    <testcontainers.version>1.20.0</testcontainers.version>
+    <mockito.version>5.12.0</mockito.version>
   </properties>
 
   <dependencyManagement>
@@ -46,6 +48,19 @@
         <artifactId>flyway-database-postgresql</artifactId>
         <version>${flyway-core.version}</version>
         <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${testcontainers.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -238,7 +253,11 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
-      <version>1.19.8</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
