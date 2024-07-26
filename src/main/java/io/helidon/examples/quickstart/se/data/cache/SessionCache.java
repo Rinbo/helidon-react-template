@@ -29,6 +29,7 @@ public class SessionCache {
     return cache.getIfPresent(uuid);
   }
 
+  // TODO when invalidating make sure to notify other instances to also invalidate the session cache
   public void invalidate(UUID uuid) {
     Objects.requireNonNull(uuid, "UUID cannot be null");
 

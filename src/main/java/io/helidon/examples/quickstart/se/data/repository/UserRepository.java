@@ -11,20 +11,28 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbRow;
 import io.helidon.dbclient.DbStatementQuery;
+import io.helidon.examples.quickstart.se.data.cache.UserCache;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.examples.quickstart.se.utils.Validate;
 
 public class UserRepository {
+  private static final Logger logger = LoggerFactory.getLogger(UserRepository.class);
+
   private final DbClient dbClient;
+  private final UserCache userCache;
 
   public UserRepository() {
     dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
+    userCache = Contexts.globalContext().get(UserCache.class).orElseThrow();
   }
 
   private static User extractUser(List<DbRow> rows) {
@@ -85,19 +93,30 @@ public class UserRepository {
 
     if (rows.isEmpty()) return Optional.empty();
 
-    return Optional.of(extractUser(rows));
+    User user = extractUser(rows);
+    userCache.put(user);
+    return Optional.of(user);
   }
 
   public Optional<User> findById(int userId) {
+    User cachedUser = userCache.get(userId);
+
+    if (cachedUser != null) {
+      logger.debug("found user in cache: {}", cachedUser);
+      return Optional.of(cachedUser);
+    }
+
+    logger.debug("no user in cache. Looking up in db: {}", userId);
+
     List<DbRow> rows = dbClient.execute()
         .createQuery("SELECT * FROM users u LEFT JOIN authorities a ON u.id = a.user_id WHERE u.id = :id")
         .addParam("id", userId)
         .execute()
         .toList();
 
-    if (rows.isEmpty()) return Optional.empty();
-
-    return Optional.of(extractUser(rows));
+    User user = extractUser(rows);
+    userCache.put(user);
+    return Optional.of(user);
   }
 
   public List<User> findPaginatedUsers(int pageSize, int page) {
@@ -124,6 +143,8 @@ public class UserRepository {
 
         batchStatement.executeBatch();
       }
+
+      userCache.invalidate(userId);
     } catch (SQLException e) {
       throw new IllegalStateException("Role update failed", e);
     }

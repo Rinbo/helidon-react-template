@@ -24,8 +24,10 @@ import io.helidon.common.media.type.MediaTypes;
 import io.helidon.config.Config;
 import io.helidon.dbclient.DbClient;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
+import io.helidon.examples.quickstart.se.data.cache.UserCache;
 import io.helidon.examples.quickstart.se.data.cleanup.DbCleanUpRunner;
 import io.helidon.examples.quickstart.se.data.model.Session;
+import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
@@ -93,8 +95,8 @@ public class Main {
     DbCleanUpRunner dbCleanUpRunner = new DbCleanUpRunner();
 
     Scheduling.fixedRate()
-        .delay(30)
-        .initialDelay(30)
+        .delay(5)
+        .initialDelay(5)
         .timeUnit(TimeUnit.MINUTES)
         .task(invocation -> dbCleanUpRunner.cleanUp())
         .build();
@@ -129,8 +131,14 @@ public class Main {
         .expireAfterWrite(Duration.ofMinutes(5))
         .build();
 
+    Cache<Integer, User> userCache = Caffeine.newBuilder()
+        .initialCapacity(1000)
+        .expireAfterWrite(Duration.ofMinutes(5))
+        .build();
+
     Context context = Contexts.globalContext();
     context.register(new SessionCache(sessionCache));
+    context.register(new UserCache(userCache));
   }
 
   private static void registerDbClient(Config dbConfig) {

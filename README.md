@@ -14,7 +14,7 @@
 - [x] Toast
 - [x] Max retries in login_passcode
 - [x] Write repository integration test for authentication brute force attacks 
-- [ ] User cache
+- [x] User cache
 - [ ] Error boundary
 - [ ] Db cleanup jobs with FOR UPDATE SKIP LOCKED
 - [ ] Postgres notify
