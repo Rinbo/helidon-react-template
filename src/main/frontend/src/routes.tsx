@@ -2,7 +2,7 @@ import { ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect,
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
-import UsersView from "./views/users/users-view.tsx";
+import UsersView, { loader as usersLoader } from "./views/users/users-view.tsx";
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 import toast from "react-hot-toast";
@@ -34,7 +34,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: "/users",
-        loader: (args: LoaderFunctionArgs<any>) => requireAuth(args, nullLoader),
+        loader: (args: LoaderFunctionArgs<any>) => requireAuth(args, usersLoader),
         handle: { requireAuth: true, label: "Users", icon: "users", showInMenu: true },
         element: <UsersView />,
       },
@@ -85,10 +85,6 @@ export async function requireAuth(args: LoaderFunctionArgs, loader: LoaderFuncti
 
 export async function redirectIfAuthenticated() {
   if (await authProvider.isAuthenticated()) return redirect("/");
-  return null;
-}
-
-async function nullLoader(_args: LoaderFunctionArgs) {
   return null;
 }
 

@@ -1,35 +1,45 @@
 import React from "react";
-import LogoutForm from "../logout/logout-form.tsx";
-import { Link } from "react-router-dom";
+import { Await, json, useAsyncValue, useLoaderData } from "react-router-dom";
+import { fetcher } from "../../utils/http.ts";
+import { sha256 } from "../../utils/misc-utils.ts";
 
 type User = { id: number; email: string; name: string; roles: string[] };
-type ResponseType = User[];
+
+export async function loader() {
+  const response = await fetcher({ path: "/api/v1/users" });
+  return json({ users: await response.json() });
+}
 
 export default function UsersView() {
-  const [response, setResponse] = React.useState<ResponseType>([]);
-
-  React.useEffect(() => {
-    fetch("/api/v1/users", { headers: { withCredentials: "true" } })
-      .then((res) => res.json())
-      .then((data) => setResponse(data))
-      .catch((e) => console.error(e));
-  }, []);
+  const { users } = useLoaderData() as { users: User[] };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2">
-      <LogoutForm />
-      <div className="text-3xl">About</div>
-      <div>Message from server:</div>
-      <div className="flex flex-row flex-wrap items-center justify-center gap-3">
-        {response.map((user) => (
-          <pre key={user.id} className="rounded-md bg-cyan-200 p-2">
-            <UpdateRoles user={user} />
-          </pre>
+    <div className="flex h-full flex-col items-center gap-6">
+      <div className="text-2xl uppercase">Users</div>
+      <div className="flex flex-row flex-wrap items-center justify-center gap-6">
+        {users.map((user) => (
+          <React.Suspense key={user.id} fallback={<p>"loading user"</p>}>
+            <Await resolve={sha256(user.email)}>
+              <UserAvatar user={user} />
+            </Await>
+          </React.Suspense>
         ))}
       </div>
-      <Link className="mt-10 hover:bg-cyan-400" to="/">
-        Home
-      </Link>
+    </div>
+  );
+}
+
+function UserAvatar({ user }: { user: User }) {
+  const hashedEmail = useAsyncValue();
+
+  return (
+    <div className="flex w-full max-w-xs flex-row items-center gap-4 rounded-lg border border-neutral bg-base-200 p-2">
+      <div className="avatar">
+        <div className="base-100 w-12 rounded-full">
+          <img src={`https://gravatar.com/avatar/${hashedEmail}?d=identicon`} alt="an avatar" />
+        </div>
+      </div>
+      <div>{user.name}</div>
     </div>
   );
 }

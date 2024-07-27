@@ -1,7 +1,6 @@
 import TextInput from "../../components/form/text-input.tsx";
 import React from "react";
 import { z } from "zod";
-import { LoginState } from "./login-wrapper.tsx";
 import { Link, useFetcher } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +9,6 @@ import { LoginAction } from "./login-view.tsx";
 import toast from "react-hot-toast";
 
 type Props = {
-  setState: React.Dispatch<React.SetStateAction<LoginState>>;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
 };
 
@@ -20,19 +18,18 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function EmailInsert({ setState, setEmail }: Props) {
+export default function EmailInsert({ setEmail }: Props) {
   const fetcher = useFetcher();
   const { register, handleSubmit, formState } = useForm<Schema>({ resolver: zodResolver(schema) });
   const action = fetcher.data as LoginAction;
 
   React.useEffect(() => {
     action?.error && toast.error(action?.error);
-    action?.success && setState("passcode-insert");
+    action?.email && setEmail(action?.email);
   }, [action]);
 
   function onSubmit(data: Schema) {
     fetcher.submit(data, { method: "post", action: "/login", encType: "application/json" });
-    setEmail(data.email);
   }
 
   return (

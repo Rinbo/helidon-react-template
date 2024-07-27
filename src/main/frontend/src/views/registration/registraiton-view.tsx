@@ -3,11 +3,12 @@ import RegistrationForm from "./registration-form.tsx";
 import { fetcher } from "../../utils/http.ts";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const response = await fetcher({ path: "/auth/web/register", method: "POST", body: await request.json() });
+  const formData = await request.json();
+  const response = await fetcher({ path: "/auth/web/register", method: "POST", body: formData });
 
   if (!response.ok) return json({ error: "Registration failed" });
 
-  return redirect("/");
+  return redirect("/login?" + new URLSearchParams({ email: formData.email }));
 }
 
 export default function RegistrationView() {

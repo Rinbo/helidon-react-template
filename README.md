@@ -20,6 +20,7 @@
 - [ ] User CRUD
 - [ ] Postgres notify
 - [ ] Security Integration Test
+- [ ] Add Last login/authentication to user table
 
 
 Sample Helidon SE project that includes multiple REST operations.
