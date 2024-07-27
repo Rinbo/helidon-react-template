@@ -19,12 +19,12 @@ export default function MainLayout() {
       <div className="grow sm:container">
         <Outlet />
       </div>
-      <div className="py-2 text-center font-mono text-sm">borjesson.dev</div>
+      <Footer />
     </main>
   );
 }
 
-function AppHeader() {
+export function AppHeader() {
   return (
     <header className="navbar flex flex-row bg-base-100">
       <AppLogo />
@@ -32,6 +32,10 @@ function AppHeader() {
       <AppMenu />
     </header>
   );
+}
+
+export function Footer() {
+  return <div className="py-2 text-center font-mono text-sm">borjesson.dev</div>;
 }
 
 function CustomNavLink({ item, className }: { item: MenuItem; className?: string }) {

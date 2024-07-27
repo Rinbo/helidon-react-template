@@ -28,6 +28,7 @@ export const authProvider: AuthProvider = {
   async fetchPrincipal() {
     try {
       const response = await fetcher({ path: "/auth/web/principal" });
+      if (!response.ok) return;
       authProvider.principal = (await response.json()) satisfies Principal;
     } catch (error) {
       console.info("No active session");

@@ -1,5 +1,7 @@
 package io.helidon.examples.quickstart.se.security;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,6 +57,14 @@ public class AuthService implements HttpService {
     userRepository = context.get(UserRepository.class).orElseThrow();
   }
 
+  private static List<String> getCookiesStrings(ServerRequest request) {
+    try {
+      return request.headers().get(HeaderNames.COOKIE).allValues();
+    } catch (NoSuchElementException e) {
+      return List.of();
+    }
+  }
+
   @Override
   public void routing(HttpRules rules) {
     rules.post("/login", this::login);
@@ -85,7 +95,7 @@ public class AuthService implements HttpService {
    * Unauthenticated route since we don't want ugly errors in frontend if user is not logged in
    */
   private void fetchPrincipal(ServerRequest request, ServerResponse response) {
-    SessionUtils.getSessionIdOption(request.headers().get(HeaderNames.COOKIE).allValues())
+    SessionUtils.getSessionIdOption(getCookiesStrings(request))
         .map(UUID::fromString)
         .flatMap(sessionRepository::findById)
         .map(Session::userId)
@@ -112,7 +122,7 @@ public class AuthService implements HttpService {
 
   private void logout(ServerRequest request, ServerResponse response) {
     Optional<Principal> principalOption = request.context().get(Principal.class);
-    Optional<String> sessionIdOption = SessionUtils.getSessionIdOption(request.headers().get(HeaderNames.COOKIE).allValues());
+    Optional<String> sessionIdOption = SessionUtils.getSessionIdOption(getCookiesStrings(request));
 
     logger.debug("logging out user {} with session {}", principalOption, sessionIdOption);
 

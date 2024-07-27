@@ -15,17 +15,11 @@
 - [x] Max retries in login_passcode
 - [x] Write repository integration test for authentication brute force attacks 
 - [x] User cache
-- [ ] Error boundary
-- [ ] Db cleanup jobs with FOR UPDATE SKIP LOCKED
+- [x] Error boundary
+- [x] Db cleanup jobs with FOR UPDATE SKIP LOCKED - Intention to only run on leader
+- [ ] User CRUD
 - [ ] Postgres notify
 - [ ] Security Integration Test
-
-
-
-1. ~~Fix user menu with gravatar in top right corner - logout, profile, theme~~
-2. Add handle thing for iterating over and creating sidebar
-3. Make use of above to make a large dropdown menu when clicking on the company logo. Or make some app thingy next to the gravatar, or just use that one
-4. Fix login to use login code instead - grab the code you wrote in medborgare.
 
 
 Sample Helidon SE project that includes multiple REST operations.

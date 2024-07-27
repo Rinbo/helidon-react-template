@@ -7,6 +7,8 @@ import React from "react";
 export default function Landing() {
   const { principal } = useAuth();
 
+  console.log(principal, "PRINCIPAL");
+
   return (
     <section className="flex h-full items-center justify-center">
       <div className="hero max-w-lg rounded-3xl py-4 text-center sm:px-8">

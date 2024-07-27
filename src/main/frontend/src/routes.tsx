@@ -2,10 +2,11 @@ import { ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect,
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
-import UsersView from "./views/about/users-view.tsx";
+import UsersView from "./views/users/users-view.tsx";
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 import toast from "react-hot-toast";
+import ErrorBoundary from "./views/ErrorBoundary.tsx";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -15,6 +16,7 @@ export const routes: RouteObject[] = [
     id: "root",
     path: "/",
     element: <MainLayout />,
+    errorElement: <ErrorBoundary />,
     async loader() {
       await authProvider.fetchPrincipal();
       return { principal: authProvider.principal };

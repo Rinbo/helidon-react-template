@@ -46,6 +46,6 @@ public class AuthFilter implements Filter {
   }
 
   private void applyFilter(ServerRequest req, ServerResponse resp) {
-    logger.info("AUTH FILTER APPLIED {}", req.path().path());
+    // do nothing for now
   }
 }

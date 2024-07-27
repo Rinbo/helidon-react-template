@@ -49,15 +49,18 @@ public class AuthRepository {
   public void cleanUpTokens() {
     Instant now = clock.instant();
     long rowCount = 0;
+    DbTransaction transaction = dbClient.transaction();
 
     try {
-      DbTransaction transaction = dbClient.transaction();
+      transaction.query("SELECT id FROM schedule_lock WHERE type = 'PASSCODES' FOR UPDATE SKIP LOCKED");
+
       rowCount = transaction
           .createDelete("DELETE FROM login_passcode WHERE expiry < :now")
           .addParam("now", now.toEpochMilli())
           .execute();
       transaction.commit();
     } catch (RuntimeException e) {
+      transaction.rollback();
       logger.error("Failed to clean up login tokens", e);
     } finally {
       logger.debug("Cleaned up {} tokens. Time taken: {}", rowCount, Duration.between(clock.instant(), now));
@@ -100,6 +103,7 @@ public class AuthRepository {
           .findFirst();
 
       transaction.update("UPDATE login_passcode SET attempts = attempts + 1 WHERE email = ?", email);
+      transaction.commit();
 
       if (optional.isEmpty()) return Either.left(new IllegalStateException("User has no active login passcodes. Please request a new one"));
 
@@ -108,14 +112,11 @@ public class AuthRepository {
       if (loginPasscode.expiry() < clock.instant().toEpochMilli()) return Either.left(new IllegalStateException("Passcode has expired"));
       if (!loginPasscode.passcode().equals(passcode)) return Either.left(new IllegalStateException("Passcode does not match"));
 
-      // TODO evaluate if we should delete it at this point. Db cleanup job will remove it otherwise
-
       return Either.right(loginPasscode);
     } catch (RuntimeException e) {
       logger.error("Failed to validate login passcode", e);
+      transaction.rollback();
       return Either.left(new IllegalStateException("Failed to validate login passcode"));
-    } finally {
-      transaction.commit();
     }
   }
 }

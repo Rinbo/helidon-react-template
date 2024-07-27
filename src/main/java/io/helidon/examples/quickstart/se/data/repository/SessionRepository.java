@@ -81,18 +81,21 @@ public class SessionRepository {
   public void cleanUpSessions() {
     Instant startTime = clock.instant();
     long deleteCount = 0;
-
+    DbTransaction transaction = dbClient.transaction();
     try {
-      dbClient.execute()
-          .createQuery("SELECT id FROM sessions WHERE expires < NOW()")
+      transaction.query("SELECT id FROM schedule_lock WHERE type = 'SESSIONS' FOR UPDATE SKIP LOCKED");
+
+      transaction.createQuery("SELECT id FROM sessions WHERE expires < NOW()")
           .execute()
           .map(row -> row.column("id").getString())
           .map(UUID::fromString)
           .forEach(sessionCache::invalidate);
 
       deleteCount = dbClient.execute().createDelete("DELETE FROM sessions WHERE expires < NOW()").execute();
+      transaction.commit();
     } catch (RuntimeException e) {
       logger.error("failed to cleanup sessions", e);
+      transaction.rollback();
     } finally {
       logger.debug("clean up {} sessions. Time taken: {}", deleteCount, Duration.between(startTime, clock.instant()));
     }
@@ -103,19 +106,23 @@ public class SessionRepository {
     Objects.requireNonNull(userAgent, "userAgent must not be null");
 
     int userId = user.id();
-
-    DbTransaction transaction = dbClient.transaction();
-    transaction.query("SELECT user_id FROM sessions WHERE user_id = ? FOR UPDATE", userId);
-
-    cleanupOldSessions(transaction, userId);
-
+    long insertCount = 0;
     UUID uuid = UUID.randomUUID();
     Instant expires = clock.instant().plus(Constants.SESSION_DURATION);
-    long insertCount = executeInsertSession(transaction, uuid, userId, expires, userAgent);
 
-    logger.debug("session insert count {}", insertCount);
+    DbTransaction transaction = dbClient.transaction();
 
-    transaction.commit();
+    try {
+      transaction.query("SELECT user_id FROM sessions WHERE user_id = ? FOR UPDATE", userId);
+      cleanupOldSessions(transaction, userId);
+      insertCount = executeInsertSession(transaction, uuid, userId, expires, userAgent);
+      transaction.commit();
+
+      logger.debug("session insert count {}", insertCount);
+    } catch (RuntimeException e) {
+      logger.error("failed to insert session", e);
+      transaction.rollback();
+    }
 
     if (insertCount > 0) {
       Session session = new Session(uuid, userId, ZonedDateTime.ofInstant(expires, ZoneOffset.UTC));

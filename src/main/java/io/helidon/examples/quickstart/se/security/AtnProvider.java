@@ -75,8 +75,6 @@ public class AtnProvider implements AuthenticationProvider {
 
   @Override
   public AuthenticationResponse authenticate(ProviderRequest providerRequest) {
-    logger.debug("ENTERED AUTH PROVIDER");
-
     return SessionUtils.getSessionIdOption(providerRequest.env().headers().getOrDefault("Cookie", List.of()))
         .flatMap(this::getValidSession)
         .flatMap(this::getUser)
