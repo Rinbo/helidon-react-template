@@ -76,7 +76,7 @@ function AppMenu() {
   const loggedInProfile = (
     <React.Fragment>
       <li>
-        <Link to="/profile">Profile</Link>
+        <Link to="/profile">{principal?.name ?? "Profile"}</Link>
       </li>
       <li>
         <LogoutForm />

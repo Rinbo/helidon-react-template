@@ -42,7 +42,8 @@ function UserAvatar({ user }: { user: User }) {
   );
 }
 
-/*const roleList = ["USER", "ADMIN", "WEBMASTER"] as const;
+/*
+const roleList = ["USER", "ADMIN", "WEBMASTER"] as const;
 
 function UpdateRoles({ user }: { user: User }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -84,4 +85,5 @@ function UpdateRoles({ user }: { user: User }) {
       </form>
     </div>
   );
-}*/
+}
+*/

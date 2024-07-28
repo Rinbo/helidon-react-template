@@ -1,6 +1,7 @@
-import { ActionFunctionArgs, json, redirect } from "react-router-dom";
+import { ActionFunctionArgs, json, Link, redirect } from "react-router-dom";
 import RegistrationForm from "./registration-form.tsx";
 import { fetcher } from "../../utils/http.ts";
+import { MdOutlineJoinInner } from "react-icons/md";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.json();
@@ -14,7 +15,21 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function RegistrationView() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 p-2">
-      <RegistrationForm />
+      <div className="flex w-full max-w-md flex-col items-center justify-center gap-2 rounded-lg border border-accent p-4">
+        <MdOutlineJoinInner size={55} className="text-secondary" />
+        <h1 className="mb-3 justify-center text-lg uppercase">Sign up</h1>
+        <RegistrationForm action="/register" />
+        <div className="mt-2 text-center">
+          Already have an account?
+          <br />
+          Please{" "}
+          <span>
+            <Link className="link-info" to="/login">
+              login here
+            </Link>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

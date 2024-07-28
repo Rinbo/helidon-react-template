@@ -12,7 +12,7 @@ export default function UsersLayout() {
   const { users } = useLoaderData() as { users: User[] };
 
   return (
-    <section>
+    <section className={"h-full"}>
       <Outlet context={{ users }} />
     </section>
   );

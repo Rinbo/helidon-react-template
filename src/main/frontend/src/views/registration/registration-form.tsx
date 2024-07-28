@@ -1,5 +1,4 @@
-import { MdOutlineJoinInner } from "react-icons/md";
-import { Link, useFetcher } from "react-router-dom";
+import { useFetcher } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,36 +11,21 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function RegistrationForm() {
+export default function RegistrationForm({ action }: { action: string }) {
   const fetcher = useFetcher();
   const { register, handleSubmit, formState } = useForm<Schema>({ resolver: zodResolver(schema) });
 
   function onSubmit(data: Schema) {
-    fetcher.submit(data, { method: "post", action: "/register", encType: "application/json" });
+    fetcher.submit(data, { method: "post", action, encType: "application/json" });
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center justify-center gap-2 rounded-lg border border-accent p-4">
-      <MdOutlineJoinInner size={55} className="text-secondary" />
-      <h1 className="mb-3 justify-center text-lg uppercase">Sign up</h1>
-
-      <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-2">
-        <TextInput register={register("name")} error={formState.errors.name?.message} placeholder="John Smith" />
-        <TextInput register={register("email")} error={formState.errors.email?.message} placeholder="name@example.com" />
-        <button tabIndex={0} disabled={fetcher.state !== "idle"} className="btn btn-primary mt-2">
-          Register
-        </button>
-      </fetcher.Form>
-      <div className="mt-2 text-center">
-        Already have an account?
-        <br />
-        Please{" "}
-        <span>
-          <Link className="link-info" to="/login">
-            login here
-          </Link>
-        </span>
-      </div>
-    </div>
+    <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-2">
+      <TextInput register={register("name")} error={formState.errors.name?.message} placeholder="John Smith" />
+      <TextInput register={register("email")} error={formState.errors.email?.message} placeholder="name@example.com" />
+      <button tabIndex={0} disabled={fetcher.state !== "idle"} className="btn btn-primary mt-2">
+        Register
+      </button>
+    </fetcher.Form>
   );
 }

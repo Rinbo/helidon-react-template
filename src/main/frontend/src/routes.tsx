@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect, RouteObject } from "react-router-dom";
+import { ActionFunction, ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect, RouteObject } from "react-router-dom";
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
@@ -8,7 +8,8 @@ import RegistrationView, { action as registrationAction } from "./views/registra
 import toast from "react-hot-toast";
 import ErrorBoundary from "./views/ErrorBoundary.tsx";
 import UsersLayout, { loader as usersLoader } from "./views/users/users-layout.tsx";
-import ContextMenu from "./components/navigation/context-menu.tsx";
+import NewUser, { action as newUserAction } from "./views/users/new-user.tsx";
+import { isAdmin } from "./utils/http.ts";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -47,12 +48,8 @@ export const routes: RouteObject[] = [
           },
           {
             path: "new",
-            element: (
-              <>
-                <ContextMenu />
-                <div>NEW USER</div>
-              </>
-            ),
+            element: <NewUser />,
+            action: (args: ActionFunctionArgs) => requireAdminAction(args, newUserAction),
             handle: { label: "Add" },
           },
         ],
@@ -115,4 +112,9 @@ async function authenticationAction({ request }: ActionFunctionArgs) {
   } catch (error) {
     return json({ error: (error as Error)?.message || "Unknown error" });
   }
+}
+
+async function requireAdminAction(args: ActionFunctionArgs, action: ActionFunction) {
+  if (isAdmin(authProvider.principal)) return action(args);
+  throw new Error("user is not allowed to access this action");
 }

@@ -1,3 +1,5 @@
+import { PrincipalOption } from "../auth/auth.ts";
+
 interface Fetcher {
   path: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -32,4 +34,9 @@ export async function extractErrorMessage(response: Response): Promise<string> {
   } catch {
     return "Unknown error";
   }
+}
+
+export function isAdmin(principal: PrincipalOption) {
+  if (!principal) return false;
+  return principal.roles.includes("ADMIN");
 }

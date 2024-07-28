@@ -10,7 +10,8 @@ server:
         authenticate: true
       paths:
         - path: "/api/*"
-        - path: "/api/v1/users/{}/roles"
+        - path: "/api/v1/users/*"
+          methods: [ "put","delete", "post" ]
           roles-allowed: [ "ADMIN" ]
         - path: "/auth/web/logout"
 

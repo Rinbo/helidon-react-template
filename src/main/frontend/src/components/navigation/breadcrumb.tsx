@@ -3,8 +3,6 @@ import { Link, useMatches } from "react-router-dom";
 type Match = {
   id: string;
   pathname: string;
-  data: object;
-  params: Record<string, string>;
   handle?: Record<string, string>;
 };
 
