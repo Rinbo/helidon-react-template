@@ -35,15 +35,15 @@ export function AppHeader() {
 }
 
 export function Footer() {
-  return <div className="py-2 text-center font-mono text-sm">borjesson.dev</div>;
+  return <div className="pb-2 pt-6 text-center font-mono text-sm">borjesson.dev</div>;
 }
 
-function CustomNavLink({ item, className }: { item: MenuItem; className?: string }) {
+function CustomNavLink({ item }: { item: MenuItem }) {
   const Icon = iconLib[item.icon];
 
   return (
     <div className="tooltip tooltip-right" data-tip={item.label}>
-      <NavLink className={className ?? "btn btn-primary h-12 w-12 p-1"} to={item.path}>
+      <NavLink className={({ isActive }) => `btn btn-primary h-12 w-12 p-1 ${isActive ? "active" : ""}`} to={item.path}>
         {Icon && <Icon className="text-xl" />}
       </NavLink>
     </div>
@@ -95,7 +95,7 @@ function AppMenu() {
       <div role="button" tabIndex={0} className="btn btn-ghost p-1">
         <IoAppsOutline className="text-3xl text-primary sm:text-4xl" />
       </div>
-      <div tabIndex={0} className="menu dropdown-content z-[1] mt-2 w-screen max-w-xs rounded-box bg-base-300 p-2 shadow sm:max-w-xl">
+      <div className="menu dropdown-content z-10 mt-2 w-80 overflow-hidden rounded-box bg-base-300 p-2 shadow sm:w-screen sm:max-w-xl">
         <div className="divider px-10 py-2 font-mono">borjessons.dev</div>
 
         <div className="row flex flex-wrap justify-center gap-4 p-4">

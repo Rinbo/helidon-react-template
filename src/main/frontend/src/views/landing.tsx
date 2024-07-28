@@ -13,7 +13,7 @@ export default function Landing() {
         <div className="hero-content flex-col">
           <HiTemplate className="text-9xl text-primary" />
           <div>
-            <h1 className="my-8 font-mono text-4xl font-bold md:text-5xl">borjessons.dev</h1>
+            <h1 className="my-5 font-mono text-4xl font-bold md:text-5xl">borjessons.dev</h1>
             <p className="py-6">
               Revolutionize your workflow with <span className="font-mono text-primary">borjessons.dev</span>. Our cutting-edge platform
               integrates seamlessly with your existing tools, boosting productivity and streamlining collaboration across your entire

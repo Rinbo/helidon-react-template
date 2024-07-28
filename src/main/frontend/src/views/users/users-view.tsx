@@ -18,7 +18,7 @@ export default function UsersView() {
       <div className="text-2xl uppercase">Users</div>
       <div className="flex flex-row flex-wrap items-center justify-center gap-6">
         {users.map((user) => (
-          <React.Suspense key={user.id} fallback={<p>"loading user"</p>}>
+          <React.Suspense key={user.id}>
             <Await resolve={sha256(user.email)}>
               <UserAvatar user={user} />
             </Await>
@@ -44,7 +44,7 @@ function UserAvatar({ user }: { user: User }) {
   );
 }
 
-const roleList = ["USER", "ADMIN", "WEBMASTER"] as const;
+/*const roleList = ["USER", "ADMIN", "WEBMASTER"] as const;
 
 function UpdateRoles({ user }: { user: User }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -86,4 +86,4 @@ function UpdateRoles({ user }: { user: User }) {
       </form>
     </div>
   );
-}
+}*/
