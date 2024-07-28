@@ -95,7 +95,7 @@ function AppMenu() {
       <div role="button" tabIndex={0} className="btn btn-ghost p-1">
         <IoAppsOutline className="text-3xl text-primary sm:text-4xl" />
       </div>
-      <div className="menu dropdown-content z-10 mt-2 w-80 overflow-hidden rounded-box bg-base-300 p-2 shadow sm:w-screen sm:max-w-xl">
+      <div tabIndex={0} className="menu dropdown-content z-[1] mt-2 w-80 rounded-box bg-base-300 p-2 shadow sm:w-screen sm:max-w-xl">
         <div className="divider px-10 py-2 font-mono">borjessons.dev</div>
 
         <div className="row flex flex-wrap justify-center gap-4 p-4">

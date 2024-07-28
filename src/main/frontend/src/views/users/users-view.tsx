@@ -1,35 +1,19 @@
 import React from "react";
-import { Await, json, Link, useAsyncValue, useLoaderData } from "react-router-dom";
-import { fetcher } from "../../utils/http.ts";
+import { Await, useAsyncValue, useOutletContext } from "react-router-dom";
 import { sha256 } from "../../utils/misc-utils.ts";
 import { IoAddCircleSharp } from "react-icons/io5";
-
-type User = { id: number; email: string; name: string; roles: string[] };
-
-export async function loader() {
-  const response = await fetcher({ path: "/api/v1/users" });
-  return json({ users: await response.json() });
-}
+import { User } from "./users-layout.tsx";
+import ContextMenu from "../../components/navigation/context-menu.tsx";
+import IconLink from "../../components/navigation/icon-link.tsx";
 
 export default function UsersView() {
-  const { users } = useLoaderData() as { users: User[] };
+  const { users } = useOutletContext() as { users: User[] };
 
   return (
     <div className="flex h-full flex-col items-center gap-2">
-      <div className="flex w-full flex-row items-center justify-center rounded-lg px-2 py-1">
-        <div className="breadcrumbs text-xs sm:text-sm">
-          <ul>
-            <li>
-              <Link to="/users">Users</Link>
-            </li>
-            <li>All</li>
-          </ul>
-        </div>
-        <div className="grow" />
-        <Link to="/users/new" className="btn btn-ghost btn-sm tooltip tooltip-bottom flex" data-tip="Add user">
-          <IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />
-        </Link>
-      </div>
+      <ContextMenu>
+        <IconLink to={"/users/new"} tooltip="Add user" icon={<IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />} />
+      </ContextMenu>
       <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
         {users.map((user) => (
           <React.Suspense key={user.id}>

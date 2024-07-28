@@ -2,11 +2,13 @@ import { ActionFunctionArgs, json, LoaderFunction, LoaderFunctionArgs, redirect,
 import MainLayout from "./views/main-layout.tsx";
 import { authProvider } from "./auth/auth.ts";
 import Landing from "./views/landing.tsx";
-import UsersView, { loader as usersLoader } from "./views/users/users-view.tsx";
+import UsersView from "./views/users/users-view.tsx";
 import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 import toast from "react-hot-toast";
 import ErrorBoundary from "./views/ErrorBoundary.tsx";
+import UsersLayout, { loader as usersLoader } from "./views/users/users-layout.tsx";
+import ContextMenu from "./components/navigation/context-menu.tsx";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -36,7 +38,24 @@ export const routes: RouteObject[] = [
         path: "/users",
         loader: (args: LoaderFunctionArgs<any>) => requireAuth(args, usersLoader),
         handle: { requireAuth: true, label: "Users", icon: "users", showInMenu: true },
-        element: <UsersView />,
+        element: <UsersLayout />,
+        children: [
+          {
+            index: true,
+            element: <UsersView />,
+            handle: { label: "All" },
+          },
+          {
+            path: "new",
+            element: (
+              <>
+                <ContextMenu />
+                <div>NEW USER</div>
+              </>
+            ),
+            handle: { label: "Add" },
+          },
+        ],
       },
       {
         path: "/profile",
