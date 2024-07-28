@@ -1,7 +1,8 @@
 import React from "react";
-import { Await, json, useAsyncValue, useLoaderData } from "react-router-dom";
+import { Await, json, Link, useAsyncValue, useLoaderData } from "react-router-dom";
 import { fetcher } from "../../utils/http.ts";
 import { sha256 } from "../../utils/misc-utils.ts";
+import { IoAddCircleSharp } from "react-icons/io5";
 
 type User = { id: number; email: string; name: string; roles: string[] };
 
@@ -14,9 +15,22 @@ export default function UsersView() {
   const { users } = useLoaderData() as { users: User[] };
 
   return (
-    <div className="flex h-full flex-col items-center gap-6">
-      <div className="text-2xl uppercase">Users</div>
-      <div className="flex flex-row flex-wrap items-center justify-center gap-6">
+    <div className="flex h-full flex-col items-center gap-2">
+      <div className="flex w-full flex-row items-center justify-center rounded-lg px-2 py-1">
+        <div className="breadcrumbs text-xs sm:text-sm">
+          <ul>
+            <li>
+              <Link to="/users">Users</Link>
+            </li>
+            <li>All</li>
+          </ul>
+        </div>
+        <div className="grow" />
+        <Link to="/users/new" className="btn btn-ghost btn-sm tooltip tooltip-bottom flex" data-tip="Add user">
+          <IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />
+        </Link>
+      </div>
+      <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
         {users.map((user) => (
           <React.Suspense key={user.id}>
             <Await resolve={sha256(user.email)}>

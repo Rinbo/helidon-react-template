@@ -26,7 +26,7 @@ export default function MainLayout() {
 
 export function AppHeader() {
   return (
-    <header className="navbar flex flex-row bg-base-100">
+    <header className="navbar flex flex-row">
       <AppLogo />
       <div className="grow" />
       <AppMenu />
