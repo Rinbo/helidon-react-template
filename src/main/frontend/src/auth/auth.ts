@@ -1,6 +1,6 @@
 import { extractErrorMessage, fetcher } from "../utils/http.ts";
+import { Role } from "../views/users/users-layout.tsx";
 
-export type Role = "ADMIN" | "USER" | "WEBMASTER";
 export type Principal = { name: string; email: string; roles: Role[] };
 export type PrincipalOption = Principal | null;
 

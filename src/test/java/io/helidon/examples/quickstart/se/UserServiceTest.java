@@ -12,7 +12,7 @@ import io.helidon.common.context.Contexts;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
-import io.helidon.examples.quickstart.se.dto.UserForm;
+import io.helidon.examples.quickstart.se.dto.RegistrationForm;
 import io.helidon.examples.quickstart.se.utils.JsonUtils;
 import io.helidon.http.Status;
 import io.helidon.webclient.http1.Http1Client;
@@ -27,7 +27,7 @@ class UserServiceTest extends ServerTestBase {
   @BeforeAll
   static void beforeAll() {
     UserRepository userRepository = Contexts.globalContext().get(UserRepository.class).orElseThrow();
-    userRepository.createUser(new UserForm("robin.b@ex.com", "Robin"));
+    userRepository.createUser(new RegistrationForm("robin.b@ex.com", "Robin"));
   }
 
   private static void verifyUser(User user) {

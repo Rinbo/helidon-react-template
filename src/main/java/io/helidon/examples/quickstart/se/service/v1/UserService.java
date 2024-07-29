@@ -11,8 +11,9 @@ import io.helidon.common.context.Contexts;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.dto.EditUserForm;
 import io.helidon.examples.quickstart.se.dto.ErrorResponse;
-import io.helidon.examples.quickstart.se.dto.UserForm;
+import io.helidon.examples.quickstart.se.dto.RegistrationForm;
 import io.helidon.http.Status;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
@@ -35,6 +36,7 @@ public class UserService implements HttpService {
   public void routing(HttpRules httpRules) {
     httpRules.get("/users", this::getPaginatedUsers);
     httpRules.get("/users/{userId}", this::getUser);
+    httpRules.put("/users/{userId}", this::editUser);
     httpRules.delete("/users/{userId}", this::deleteUser);
     httpRules.post("/users", this::createUser);
     httpRules.put("/users/{userId}/roles", this::updateUserRoles);
@@ -43,23 +45,35 @@ public class UserService implements HttpService {
   /**
    * Create a user
    *
-   * @param request  the request containing a {@link UserForm}
+   * @param request  the request containing a {@link RegistrationForm}
    * @param response ok response if user was created
    */
   private void createUser(ServerRequest request, ServerResponse response) {
-    userRepository.createUser(request.content().as(UserForm.class));
+    userRepository.createUser(request.content().as(RegistrationForm.class));
     response.status(Status.CREATED_201).send();
   }
 
   private void deleteUser(ServerRequest request, ServerResponse response) {
     int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
 
-    if (userRepository.deleteById(userId)) {
-      response.status(Status.NO_CONTENT_204).send();
+    if (!userRepository.deleteById(userId)) {
+      response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("Failed to delete user"));
       return;
     }
 
-    response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("Failed to delete user"));
+    response.status(Status.NO_CONTENT_204).send();
+  }
+
+  private void editUser(ServerRequest request, ServerResponse response) {
+    int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
+    EditUserForm editUserForm = request.content().as(EditUserForm.class);
+
+    if (!userRepository.updateUser(userId, editUserForm)) {
+      response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("User could not be updated"));
+      return;
+    }
+
+    response.status(Status.NO_CONTENT_204).send();
   }
 
   private void getPaginatedUsers(ServerRequest request, ServerResponse response) {

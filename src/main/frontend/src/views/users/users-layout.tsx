@@ -1,7 +1,9 @@
 import { json, Outlet, useLoaderData } from "react-router-dom";
 import { fetcher } from "../../utils/http.ts";
 
-export type User = { id: number; email: string; name: string; roles: string[]; createdAt: string; updatedAt: string };
+export const ROLE_LIST = ["USER", "ADMIN", "WEBMASTER"] as const;
+export type Role = (typeof ROLE_LIST)[number];
+export type User = { id: number; email: string; name: string; roles: Role[]; createdAt: string; updatedAt: string };
 
 export async function loader() {
   const response = await fetcher({ path: "/api/v1/users" });

@@ -20,7 +20,7 @@ import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
-import io.helidon.examples.quickstart.se.dto.UserForm;
+import io.helidon.examples.quickstart.se.dto.RegistrationForm;
 import io.helidon.examples.quickstart.se.utils.Either;
 import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
@@ -133,11 +133,11 @@ public class AuthService implements HttpService {
   }
 
   private void register(ServerRequest request, ServerResponse response) {
-    UserForm userForm = request.content().as(UserForm.class);
-    Validate.fields(userForm);
+    RegistrationForm registrationForm = request.content().as(RegistrationForm.class);
+    Validate.fields(registrationForm);
 
-    userRepository.createUser(userForm);
-    generateAndSendMagicLink(userForm.email());
+    userRepository.createUser(registrationForm);
+    generateAndSendMagicLink(registrationForm.email());
     response.status(Status.CREATED_201).send();
   }
 }

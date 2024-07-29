@@ -3,7 +3,9 @@ package io.helidon.examples.quickstart.se.data.repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,10 +20,12 @@ import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import io.helidon.dbclient.DbRow;
 import io.helidon.dbclient.DbStatementQuery;
+import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.cache.UserCache;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
-import io.helidon.examples.quickstart.se.dto.UserForm;
+import io.helidon.examples.quickstart.se.dto.EditUserForm;
+import io.helidon.examples.quickstart.se.dto.RegistrationForm;
 import io.helidon.examples.quickstart.se.utils.Validate;
 
 public class UserRepository {
@@ -56,8 +60,8 @@ public class UserRepository {
     return extractUser(entry.getValue());
   }
 
-  public void createUser(UserForm userForm) {
-    Validate.fields(userForm);
+  public void createUser(RegistrationForm registrationForm) {
+    Validate.fields(registrationForm);
 
     String sql = """
         WITH new_user AS (
@@ -72,8 +76,8 @@ public class UserRepository {
 
     dbClient.execute()
         .createInsert(sql)
-        .addParam("email", userForm.email().trim().toLowerCase())
-        .addParam("name", userForm.name().trim())
+        .addParam("email", registrationForm.email().trim().toLowerCase())
+        .addParam("name", registrationForm.name().trim())
         .execute();
   }
 
@@ -134,8 +138,45 @@ public class UserRepository {
         .addParam("offset", page * pageSize));
   }
 
+  public boolean updateUser(int userId, EditUserForm editUserForm) {
+    DbTransaction transaction = dbClient.transaction();
+    long updateCount;
+
+    try {
+      updateCount = transaction.createUpdate("UPDATE users SET name = :name, updated_at = :updatedAt WHERE id = :userId")
+          .addParam("name", editUserForm.name().trim())
+          .addParam("updatedAt", new Date(Instant.now().toEpochMilli()))
+          .addParam("userId", userId)
+          .execute();
+
+      updateUserRoles(transaction, userId, editUserForm.roles());
+      transaction.commit();
+    } catch (RuntimeException e) {
+      logger.warn("failed to update user with id {}", userId, e);
+      transaction.rollback();
+      updateCount = 0;
+    }
+
+    return updateCount > 0;
+  }
+
   public void updateUserRoles(int userId, List<Role> roles) {
-    try (Connection connection = dbClient.transaction().unwrap(Connection.class)) {
+    DbTransaction transaction = dbClient.transaction();
+    updateUserRoles(transaction, userId, roles);
+  }
+
+  private List<User> multiSelect(DbStatementQuery query) {
+    return query
+        .execute()
+        .collect(Collectors.groupingBy(row -> row.column("id").getInt(), TreeMap::new, Collectors.toList()))
+        .entrySet()
+        .stream()
+        .map(UserRepository::extractUser)
+        .toList();
+  }
+
+  private void updateUserRoles(DbTransaction transaction, int userId, List<Role> roles) {
+    try (Connection connection = transaction.unwrap(Connection.class)) {
       try (PreparedStatement deleteStatement = connection.prepareStatement("DELETE FROM authorities WHERE user_id = ?")) {
         deleteStatement.setInt(1, userId);
         deleteStatement.executeUpdate();
@@ -155,15 +196,5 @@ public class UserRepository {
     } catch (SQLException e) {
       throw new IllegalStateException("Role update failed", e);
     }
-  }
-
-  private List<User> multiSelect(DbStatementQuery query) {
-    return query
-        .execute()
-        .collect(Collectors.groupingBy(row -> row.column("id").getInt(), TreeMap::new, Collectors.toList()))
-        .entrySet()
-        .stream()
-        .map(UserRepository::extractUser)
-        .toList();
   }
 }
