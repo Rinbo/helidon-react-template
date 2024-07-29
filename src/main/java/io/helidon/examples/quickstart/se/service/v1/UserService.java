@@ -13,7 +13,6 @@ import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.http.Status;
-import io.helidon.security.Principal;
 import io.helidon.webserver.http.HttpRules;
 import io.helidon.webserver.http.HttpService;
 import io.helidon.webserver.http.ServerRequest;
@@ -34,6 +33,7 @@ public class UserService implements HttpService {
   @Override
   public void routing(HttpRules httpRules) {
     httpRules.get("/users", this::getPaginatedUsers);
+    httpRules.get("/users/{userId}", this::getUser);
     httpRules.post("/users", this::createUser);
     httpRules.put("/users/{userId}/roles", this::updateUserRoles);
   }
@@ -53,13 +53,12 @@ public class UserService implements HttpService {
     int pageSize = request.prologue().query().first("page-size").asInt().orElse(100);
     int page = request.prologue().query().first("page").asInt().orElse(0);
 
-    request.context().get(Principal.class).ifPresent(principal -> {
-      logger.info("principal {}", principal);
+    response.send(userRepository.findPaginatedUsers(pageSize, page));
+  }
 
-    });
-
-    List<User> users = userRepository.findPaginatedUsers(pageSize, page);
-    response.send(users);
+  private void getUser(ServerRequest request, ServerResponse response) {
+    int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
+    response.send(userRepository.findById(userId).orElseThrow());
   }
 
   /**

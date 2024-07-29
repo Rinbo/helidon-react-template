@@ -7,9 +7,10 @@ import LoginView, { action as loginAction } from "./views/login/login-view.tsx";
 import RegistrationView, { action as registrationAction } from "./views/registration/registraiton-view.tsx";
 import toast from "react-hot-toast";
 import ErrorBoundary from "./views/ErrorBoundary.tsx";
-import UsersLayout, { loader as usersLoader } from "./views/users/users-layout.tsx";
-import NewUser, { action as newUserAction } from "./views/users/new-user.tsx";
+import UsersLayout, { loader as usersLoader, User } from "./views/users/users-layout.tsx";
+import NewUserView, { action as newUserAction } from "./views/users/new-user-view.tsx";
 import { isAdmin } from "./utils/http.ts";
+import ShowUserView, { loader as showUserLoader } from "./views/users/show-user-view.tsx";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -28,36 +29,42 @@ export const routes: RouteObject[] = [
       {
         index: true,
         element: <Landing />,
-        handle: { requireAuth: false, label: "Home", icon: "home", showInMenu: true },
+        handle: { requireAuth: false, label: "Home", icon: "home", showInMenu: true, crumb: () => "Home" },
       },
       {
         path: "/about",
-        handle: { requireAuth: false, label: "About", icon: "info", showInMenu: true },
+        handle: { requireAuth: false, label: "About", icon: "info", showInMenu: true, crumb: () => "About" },
         element: <div className="py-4 text-center text-3xl uppercase">About</div>,
       },
       {
         path: "/users",
         loader: (args: LoaderFunctionArgs<any>) => requireAuth(args, usersLoader),
-        handle: { requireAuth: true, label: "Users", icon: "users", showInMenu: true },
+        handle: { requireAuth: true, label: "Users", icon: "users", showInMenu: true, crumb: () => "Users" },
         element: <UsersLayout />,
         children: [
           {
             index: true,
             element: <UsersView />,
-            handle: { label: "All" },
+            handle: { crumb: () => "All" },
           },
           {
             path: "new",
-            element: <NewUser />,
+            element: <NewUserView />,
             action: (args: ActionFunctionArgs) => requireAdminAction(args, newUserAction),
-            handle: { label: "Add" },
+            handle: { crumb: () => "Add" },
+          },
+          {
+            path: ":userId",
+            element: <ShowUserView />,
+            loader: (args: LoaderFunctionArgs) => requireAuth(args, showUserLoader),
+            handle: { crumb: (user: User) => user.name },
           },
         ],
       },
       {
         path: "/profile",
         element: <div className="py-4 text-center text-3xl uppercase">Profile</div>,
-        handle: { requireAuth: true, label: "Profile", icon: "user", showInMenu: true },
+        handle: { requireAuth: true, label: "Profile", icon: "user", showInMenu: true, crumb: () => "Profile" },
       },
       {
         path: "/login",

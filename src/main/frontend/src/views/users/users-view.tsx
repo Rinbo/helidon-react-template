@@ -1,10 +1,10 @@
-import React from "react";
-import { Await, useAsyncValue, useOutletContext } from "react-router-dom";
-import { sha256 } from "../../utils/misc-utils.ts";
+import { Link, useOutletContext } from "react-router-dom";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { User } from "./users-layout.tsx";
 import ContextMenu from "../../components/navigation/context-menu.tsx";
 import IconLink from "../../components/navigation/icon-link.tsx";
+import RequireAdmin from "../require-admin.tsx";
+import Avatar from "../../components/avatar.tsx";
 
 export default function UsersView() {
   const { users } = useOutletContext() as { users: User[] };
@@ -12,15 +12,13 @@ export default function UsersView() {
   return (
     <div className="flex h-full flex-col items-center gap-2">
       <ContextMenu>
-        <IconLink to={"/users/new"} tooltip="Add user" icon={<IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />} />
+        <RequireAdmin>
+          <IconLink to={"/users/new"} tooltip="Add user" icon={<IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />} />
+        </RequireAdmin>
       </ContextMenu>
       <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
         {users.map((user) => (
-          <React.Suspense key={user.id}>
-            <Await resolve={sha256(user.email)}>
-              <UserAvatar user={user} />
-            </Await>
-          </React.Suspense>
+          <UserAvatar user={user} />
         ))}
       </div>
     </div>
@@ -28,17 +26,14 @@ export default function UsersView() {
 }
 
 function UserAvatar({ user }: { user: User }) {
-  const hashedEmail = useAsyncValue();
-
   return (
-    <div className="flex w-full max-w-xs flex-row items-center gap-4 rounded-lg border border-neutral bg-base-200 p-2">
-      <div className="avatar">
-        <div className="base-100 w-12 rounded-full">
-          <img src={`https://gravatar.com/avatar/${hashedEmail}?d=identicon`} alt="an avatar" />
-        </div>
-      </div>
+    <Link
+      to={"/users/" + user.id}
+      className="flex w-full max-w-xs flex-row items-center gap-4 rounded-lg border border-neutral bg-base-200 p-2 hover:bg-base-300"
+    >
+      <Avatar user={user} />
       <div>{user.name}</div>
-    </div>
+    </Link>
   );
 }
 

@@ -2,20 +2,27 @@ import { Link, useMatches } from "react-router-dom";
 
 type Match = {
   id: string;
+  data: object;
   pathname: string;
-  handle?: Record<string, string>;
+  handle?: { crumb: (data?: object) => string };
 };
 
 export default function Breadcrumb() {
   const matches = useMatches() as Match[];
-  const crumbs = matches.filter((match) => Boolean(match?.handle?.label));
+  console.log(matches);
+
+  const augmentedMatches = matches
+    .filter((match) => Boolean(match?.handle?.crumb))
+    .map((match) => {
+      return { ...match, crumb: match.handle?.crumb(match?.data) };
+    });
 
   return (
     <div className="breadcrumbs text-xs sm:text-sm">
       <ul>
-        {crumbs.map((crumb) => (
-          <li key={crumb.id}>
-            <Link to={crumb.pathname}>{crumb.handle?.label}</Link>
+        {augmentedMatches.map((match) => (
+          <li key={match.id}>
+            <Link to={match.pathname}>{match.crumb}</Link>
           </li>
         ))}
       </ul>

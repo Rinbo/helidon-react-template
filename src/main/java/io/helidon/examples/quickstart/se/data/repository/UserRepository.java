@@ -72,7 +72,7 @@ public class UserRepository {
 
     dbClient.execute()
         .createInsert(sql)
-        .addParam("email", userForm.email())
+        .addParam("email", userForm.email().trim().toLowerCase())
         .addParam("name", userForm.name())
         .execute();
   }
