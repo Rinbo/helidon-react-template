@@ -9,7 +9,6 @@ type Match = {
 
 export default function Breadcrumb() {
   const matches = useMatches() as Match[];
-  console.log(matches);
 
   const augmentedMatches = matches
     .filter((match) => Boolean(match?.handle?.crumb))

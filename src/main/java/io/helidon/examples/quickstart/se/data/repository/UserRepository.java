@@ -73,8 +73,15 @@ public class UserRepository {
     dbClient.execute()
         .createInsert(sql)
         .addParam("email", userForm.email().trim().toLowerCase())
-        .addParam("name", userForm.name())
+        .addParam("name", userForm.name().trim())
         .execute();
+  }
+
+  public boolean deleteById(int userId) {
+    logger.debug("Deleting user with id: {}", userId);
+    long delete = dbClient.execute().delete("DELETE FROM users WHERE id = ?", userId);
+    userCache.invalidate(userId);
+    return delete > 0;
   }
 
   public List<User> findAll() {

@@ -11,6 +11,7 @@ import io.helidon.common.context.Contexts;
 import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
+import io.helidon.examples.quickstart.se.dto.ErrorResponse;
 import io.helidon.examples.quickstart.se.dto.UserForm;
 import io.helidon.http.Status;
 import io.helidon.webserver.http.HttpRules;
@@ -34,6 +35,7 @@ public class UserService implements HttpService {
   public void routing(HttpRules httpRules) {
     httpRules.get("/users", this::getPaginatedUsers);
     httpRules.get("/users/{userId}", this::getUser);
+    httpRules.delete("/users/{userId}", this::deleteUser);
     httpRules.post("/users", this::createUser);
     httpRules.put("/users/{userId}/roles", this::updateUserRoles);
   }
@@ -47,6 +49,17 @@ public class UserService implements HttpService {
   private void createUser(ServerRequest request, ServerResponse response) {
     userRepository.createUser(request.content().as(UserForm.class));
     response.status(Status.CREATED_201).send();
+  }
+
+  private void deleteUser(ServerRequest request, ServerResponse response) {
+    int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
+
+    if (userRepository.deleteById(userId)) {
+      response.status(Status.NO_CONTENT_204).send();
+      return;
+    }
+
+    response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("Failed to delete user"));
   }
 
   private void getPaginatedUsers(ServerRequest request, ServerResponse response) {

@@ -18,7 +18,7 @@ export default function UsersView() {
       </ContextMenu>
       <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
         {users.map((user) => (
-          <UserAvatar user={user} />
+          <UserAvatar key={user.id} user={user} />
         ))}
       </div>
     </div>

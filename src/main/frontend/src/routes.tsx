@@ -10,7 +10,7 @@ import ErrorBoundary from "./views/ErrorBoundary.tsx";
 import UsersLayout, { loader as usersLoader, User } from "./views/users/users-layout.tsx";
 import NewUserView, { action as newUserAction } from "./views/users/new-user-view.tsx";
 import { isAdmin } from "./utils/http.ts";
-import ShowUserView, { loader as showUserLoader } from "./views/users/show-user-view.tsx";
+import ShowUserView, { deleteUser, loader as showUserLoader } from "./views/users/show-user-view.tsx";
 
 export type MenuItem = Handle & { path: string };
 type Handle = { requireAuth: boolean; label: string; icon: string; showInMenu: boolean };
@@ -58,6 +58,10 @@ export const routes: RouteObject[] = [
             element: <ShowUserView />,
             loader: (args: LoaderFunctionArgs) => requireAuth(args, showUserLoader),
             handle: { crumb: (user: User) => user.name },
+          },
+          {
+            path: ":userId/delete",
+            action: deleteUser,
           },
         ],
       },
