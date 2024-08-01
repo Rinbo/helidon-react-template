@@ -21,6 +21,8 @@ import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
 import io.helidon.examples.quickstart.se.dto.RegistrationForm;
+import io.helidon.examples.quickstart.se.notify.Channel;
+import io.helidon.examples.quickstart.se.notify.ChannelNotifier;
 import io.helidon.examples.quickstart.se.utils.Either;
 import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
@@ -39,15 +41,22 @@ public class AuthService implements HttpService {
   private final AuthRepository authRepository;
   private final SessionRepository sessionRepository;
   private final UserRepository userRepository;
+  private final ChannelNotifier channelNotifier;
 
-  public AuthService(AuthRepository authRepository, SessionRepository sessionRepository, UserRepository userRepository) {
+  public AuthService(
+      AuthRepository authRepository,
+      SessionRepository sessionRepository,
+      UserRepository userRepository,
+      ChannelNotifier channelNotifier) {
     Objects.requireNonNull(authRepository, "authRepository is required");
     Objects.requireNonNull(sessionRepository, "sessionRepository is required");
     Objects.requireNonNull(userRepository, "userRepository is required");
+    Objects.requireNonNull(channelNotifier, "channelNotifier is required");
 
-    this.userRepository = userRepository;
-    this.sessionRepository = sessionRepository;
     this.authRepository = authRepository;
+    this.sessionRepository = sessionRepository;
+    this.userRepository = userRepository;
+    this.channelNotifier = channelNotifier;
   }
 
   public AuthService() {
@@ -55,6 +64,7 @@ public class AuthService implements HttpService {
     authRepository = context.get(AuthRepository.class).orElseThrow();
     sessionRepository = context.get(SessionRepository.class).orElseThrow();
     userRepository = context.get(UserRepository.class).orElseThrow();
+    channelNotifier = context.get(ChannelNotifier.class).orElseThrow();
   }
 
   private static List<String> getCookiesStrings(ServerRequest request) {
@@ -72,6 +82,8 @@ public class AuthService implements HttpService {
     rules.post("/logout", this::logout);
     rules.get("/principal", this::fetchPrincipal);
     rules.post("/register", this::register);
+
+    rules.get("/notify/{event}", this::notify);
   }
 
   private void authenticate(ServerRequest request, ServerResponse response) {
@@ -130,6 +142,25 @@ public class AuthService implements HttpService {
     response.headers().addCookie(SessionUtils.createLogoutCookie());
     response.headers().add(HeaderNames.LOCATION, "/");
     response.status(Status.FOUND_302).send();
+  }
+
+  private void notify(ServerRequest request, ServerResponse response) {
+    String event = request.path().pathParameters().first("event").orElse("unknown");
+
+    switch (event) {
+      case "user-event": {
+        channelNotifier.notify(Channel.USER_CACHE);
+        response.send();
+        return;
+      }
+      case "session-event": {
+        channelNotifier.notify(Channel.SESSION_CACHE);
+        response.send();
+        return;
+      }
+      default:
+        response.status(Status.BAD_REQUEST_400).send();
+    }
   }
 
   private void register(ServerRequest request, ServerResponse response) {

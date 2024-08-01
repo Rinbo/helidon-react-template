@@ -2,6 +2,7 @@ package io.helidon.examples.quickstart.se;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -32,6 +33,8 @@ import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.ErrorResponse;
+import io.helidon.examples.quickstart.se.notify.ChannelListener;
+import io.helidon.examples.quickstart.se.notify.ChannelNotifier;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
@@ -83,12 +86,25 @@ public class Main {
     Config dbConfig = config.get("db");
     registerDbClient(dbConfig);
     runFlywayMigration(dbConfig);
+    setupPgNotifications();
 
     registerValidator();
 
     registerCaches();
     registerRepositories();
     configureScheduledJobs();
+  }
+
+  static void setupPgNotifications() {
+    DbClient dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
+    Contexts.globalContext().register(new ChannelNotifier(dbClient));
+
+    Connection connection = dbClient.unwrap(Connection.class);
+
+    ChannelListener channelListener = new ChannelListener(connection);
+    Thread thread = new Thread(channelListener);
+    thread.start();
+    channelListener.startListening();
   }
 
   private static void configureScheduledJobs() {
@@ -116,6 +132,8 @@ public class Main {
 
   private static void handleException(ServerRequest req, ServerResponse res, Exception exception) {
     res.headers().contentType(MediaTypes.APPLICATION_JSON);
+
+    logger.error("", exception);
 
     switch (exception) {
       case ConstraintViolationException e -> res.status(Status.BAD_REQUEST_400).send(ErrorResponse.of("Unable to parse request", e.getMessage()));
