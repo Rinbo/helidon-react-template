@@ -33,8 +33,10 @@ import io.helidon.examples.quickstart.se.data.repository.AuthRepository;
 import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.ErrorResponse;
+import io.helidon.examples.quickstart.se.notify.CacheInvalidatorNotifier;
 import io.helidon.examples.quickstart.se.notify.ChannelListener;
 import io.helidon.examples.quickstart.se.notify.ChannelNotifier;
+import io.helidon.examples.quickstart.se.notify.ChannelReceiver;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
@@ -86,22 +88,23 @@ public class Main {
     Config dbConfig = config.get("db");
     registerDbClient(dbConfig);
     runFlywayMigration(dbConfig);
-    setupPgNotifications();
 
     registerValidator();
 
     registerCaches();
+    setupPgNotifications();
     registerRepositories();
     configureScheduledJobs();
   }
 
   static void setupPgNotifications() {
     DbClient dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
-    Contexts.globalContext().register(new ChannelNotifier(dbClient));
+    ChannelNotifier channelNotifier = new ChannelNotifier(dbClient);
+    Contexts.globalContext().register(new CacheInvalidatorNotifier(channelNotifier));
 
     Connection connection = dbClient.unwrap(Connection.class);
 
-    ChannelListener channelListener = new ChannelListener(connection);
+    ChannelListener channelListener = new ChannelListener(connection, new ChannelReceiver());
     Thread thread = new Thread(channelListener);
     thread.start();
     channelListener.startListening();

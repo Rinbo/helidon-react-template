@@ -1,14 +1,12 @@
 package io.helidon.examples.quickstart.se.notify;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.helidon.dbclient.DbClient;
+import jakarta.json.JsonObject;
 
 public class ChannelNotifier {
   private static final Logger logger = LoggerFactory.getLogger(ChannelNotifier.class);
@@ -20,19 +18,12 @@ public class ChannelNotifier {
     this.dbClient = dbClient;
   }
 
-  public void notify(Channel channel) {
+  public void notify(Channel channel, JsonObject jsonObject) {
     logger.debug("notifying {}", channel);
 
-    try (Statement statement = dbClient.unwrap(Connection.class).createStatement()) {
-      switch (channel) {
-        case USER_CACHE -> statement.execute("NOTIFY user_cache, 'invalidate'");
-        case SESSION_CACHE -> statement.execute("NOTIFY session_cache, 'invalidate'");
-      }
-      ;
-
-    } catch (SQLException e) {
-      logger.error("failed to notify", e);
-      throw new IllegalStateException(e);
-    }
+    dbClient.execute().createQuery("SELECT pg_notify(quote_ident(:channel), quote_literal(:payload))")
+        .addParam("channel", channel.toString())
+        .addParam("payload", jsonObject.toString())
+        .execute();
   }
 }

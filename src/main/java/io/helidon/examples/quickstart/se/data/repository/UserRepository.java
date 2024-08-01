@@ -26,6 +26,7 @@ import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.dto.EditUserForm;
 import io.helidon.examples.quickstart.se.dto.RegistrationForm;
+import io.helidon.examples.quickstart.se.notify.CacheInvalidatorNotifier;
 import io.helidon.examples.quickstart.se.utils.Validate;
 
 public class UserRepository {
@@ -33,10 +34,12 @@ public class UserRepository {
 
   private final DbClient dbClient;
   private final UserCache userCache;
+  private final CacheInvalidatorNotifier cacheInvalidatorNotifier;
 
   public UserRepository() {
     dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
     userCache = Contexts.globalContext().get(UserCache.class).orElseThrow();
+    cacheInvalidatorNotifier = Contexts.globalContext().get(CacheInvalidatorNotifier.class).orElseThrow();
   }
 
   private static User extractUser(List<DbRow> rows) {
@@ -84,7 +87,7 @@ public class UserRepository {
   public boolean deleteById(int userId) {
     logger.debug("Deleting user with id: {}", userId);
     long delete = dbClient.execute().delete("DELETE FROM users WHERE id = ?", userId);
-    userCache.invalidate(userId);
+    cacheInvalidatorNotifier.invalidateUser(userId);
     return delete > 0;
   }
 
@@ -192,7 +195,7 @@ public class UserRepository {
         batchStatement.executeBatch();
       }
 
-      userCache.invalidate(userId);
+      cacheInvalidatorNotifier.invalidateUser(userId);
     } catch (SQLException e) {
       throw new IllegalStateException("Role update failed", e);
     }

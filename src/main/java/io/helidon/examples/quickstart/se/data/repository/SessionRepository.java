@@ -21,6 +21,7 @@ import io.helidon.dbclient.DbTransaction;
 import io.helidon.examples.quickstart.se.data.cache.SessionCache;
 import io.helidon.examples.quickstart.se.data.model.Session;
 import io.helidon.examples.quickstart.se.data.model.User;
+import io.helidon.examples.quickstart.se.notify.CacheInvalidatorNotifier;
 import io.helidon.examples.quickstart.se.utils.Constants;
 
 public class SessionRepository {
@@ -29,21 +30,25 @@ public class SessionRepository {
   private final Clock clock;
   private final DbClient dbClient;
   private final SessionCache sessionCache;
+  private final CacheInvalidatorNotifier cacheInvalidatorNotifier;
 
-  public SessionRepository(Clock clock, DbClient dbClient, SessionCache sessionCache) {
+  public SessionRepository(Clock clock, DbClient dbClient, SessionCache sessionCache, CacheInvalidatorNotifier cacheInvalidatorNotifier) {
     Objects.requireNonNull(clock, "clock must not be null");
     Objects.requireNonNull(dbClient, "dbClient must not be null");
     Objects.requireNonNull(sessionCache, "sessionCache must not be null");
+    Objects.requireNonNull(cacheInvalidatorNotifier, "cacheInvalidator must not be null");
 
     this.clock = clock;
     this.dbClient = dbClient;
     this.sessionCache = sessionCache;
+    this.cacheInvalidatorNotifier = cacheInvalidatorNotifier;
   }
 
   public SessionRepository() {
     clock = Clock.systemUTC();
     dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
     sessionCache = Contexts.globalContext().get(SessionCache.class).orElseThrow();
+    cacheInvalidatorNotifier = Contexts.globalContext().get(CacheInvalidatorNotifier.class).orElseThrow();
   }
 
   private static long executeCountByUserIdQuery(DbExecute dbExecute, int userId) {
@@ -89,7 +94,7 @@ public class SessionRepository {
           .execute()
           .map(row -> row.column("id").getString())
           .map(UUID::fromString)
-          .forEach(sessionCache::invalidate);
+          .forEach(cacheInvalidatorNotifier::invalidateSession);
 
       deleteCount = dbClient.execute().createDelete("DELETE FROM sessions WHERE expires < NOW()").execute();
       transaction.commit();
@@ -138,7 +143,7 @@ public class SessionRepository {
     long deleteCount = executeDeleteById(dbClient.execute(), id);
     logger.debug("deleted session: {}, count {}", id, deleteCount);
 
-    sessionCache.invalidate(id);
+    cacheInvalidatorNotifier.invalidateSession(id);
   }
 
   public Optional<Session> findById(UUID id) {
@@ -183,7 +188,7 @@ public class SessionRepository {
             UUID idToDelete = session.id();
             long deleteCount = executeDeleteById(transaction, idToDelete);
             logger.debug("cleanup job - session delete count: {}", deleteCount);
-            sessionCache.invalidate(idToDelete);
+            cacheInvalidatorNotifier.invalidateSession(idToDelete);
           });
     }
   }

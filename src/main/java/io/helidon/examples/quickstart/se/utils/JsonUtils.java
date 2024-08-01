@@ -15,6 +15,7 @@ public final class JsonUtils {
   }
 
   public static <T> List<T> fromJsonList(JsonArray jsonArray, Class<T> type) {
+
     return jsonArray.stream()
         .map(JsonValue::asJsonObject)
         .map(jsonObject -> JSONB.fromJson(jsonObject.toString(), type))

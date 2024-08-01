@@ -11,13 +11,22 @@ import org.postgresql.PGNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonObject;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+
 public class ChannelListener implements Runnable {
+  private static final Jsonb JSONB = JsonbBuilder.create();
   private static final Logger logger = LoggerFactory.getLogger(ChannelListener.class);
 
   private final Connection connection;
+  private final ChannelReceiver channelReceiver;
 
-  public ChannelListener(Connection connection) {
+  public ChannelListener(Connection connection, ChannelReceiver channelReceiver) {
     Objects.requireNonNull(connection, "connection cannot be null");
+    Objects.requireNonNull(channelReceiver, "channelReceiver cannot be null");
+
+    this.channelReceiver = channelReceiver;
     this.connection = connection;
   }
 
@@ -25,6 +34,10 @@ public class ChannelListener implements Runnable {
     try (Statement statement = connection.createStatement()) {
       statement.execute("LISTEN " + channel.name());
     }
+  }
+
+  private static String stripSingleQuotes(String string) {
+    return string.substring(1, string.length() - 1);
   }
 
   @Override
@@ -68,8 +81,12 @@ public class ChannelListener implements Runnable {
     PGNotification[] notifications = pgConnection.getNotifications();
     if (notifications != null) {
       Arrays.stream(notifications).forEach(notification -> {
-        logger.info("received notification with name: {}", notification.getName());
-        logger.info("received notification with parameter: {}", notification.getParameter());
+
+        logger.debug("received notification with name: {}", notification.getName());
+        logger.debug("received notification with parameter: {}", notification.getParameter());
+
+        Channel.fromString(notification.getName())
+            .ifPresent(channel -> channelReceiver.receive(channel, JSONB.fromJson(stripSingleQuotes(notification.getParameter()), JsonObject.class)));
       });
     }
   }

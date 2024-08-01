@@ -26,7 +26,6 @@ public class UserCache {
     return cache.getIfPresent(userId);
   }
 
-  // TODO when invalidating make sure to notify other instances to also invalidate the user cache
   public void invalidate(int userId) {
     logger.debug("invalidating cached user {}", userId);
 
