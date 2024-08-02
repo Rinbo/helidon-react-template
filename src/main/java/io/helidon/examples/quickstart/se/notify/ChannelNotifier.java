@@ -1,10 +1,9 @@
 package io.helidon.examples.quickstart.se.notify;
 
-import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.helidon.common.context.Contexts;
 import io.helidon.dbclient.DbClient;
 import jakarta.json.JsonObject;
 
@@ -13,9 +12,8 @@ public class ChannelNotifier {
 
   private final DbClient dbClient;
 
-  public ChannelNotifier(DbClient dbClient) {
-    Objects.requireNonNull(dbClient, "dbClient must not be null");
-    this.dbClient = dbClient;
+  public ChannelNotifier() {
+    dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
   }
 
   public void notify(Channel channel, JsonObject jsonObject) {

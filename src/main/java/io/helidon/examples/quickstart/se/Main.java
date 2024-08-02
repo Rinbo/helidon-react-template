@@ -3,6 +3,7 @@ package io.helidon.examples.quickstart.se;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -86,28 +87,29 @@ public class Main {
   static void setup(Config config) {
     Config.global(config);
     Config dbConfig = config.get("db");
+    DataSource datasource = createDatasource(dbConfig);
     registerDbClient(dbConfig);
-    runFlywayMigration(dbConfig);
+    runFlywayMigration(datasource);
 
     registerValidator();
 
     registerCaches();
-    setupPgNotifications();
+    setupPgNotifications(datasource);
     registerRepositories();
     configureScheduledJobs();
   }
 
-  static void setupPgNotifications() {
-    DbClient dbClient = Contexts.globalContext().get(DbClient.class).orElseThrow();
-    ChannelNotifier channelNotifier = new ChannelNotifier(dbClient);
-    Contexts.globalContext().register(new CacheInvalidatorNotifier(channelNotifier));
-
-    Connection connection = dbClient.unwrap(Connection.class);
-
-    ChannelListener channelListener = new ChannelListener(connection, new ChannelReceiver());
-    Thread thread = new Thread(channelListener);
-    thread.start();
-    channelListener.startListening();
+  static void setupPgNotifications(DataSource datasource) {
+    Contexts.globalContext().register(new CacheInvalidatorNotifier(new ChannelNotifier()));
+    try {
+      Connection connection = datasource.getConnection();
+      ChannelListener channelListener = new ChannelListener(connection, new ChannelReceiver());
+      channelListener.startListening();
+      Thread thread = new Thread(channelListener);
+      thread.start();
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   private static void configureScheduledJobs() {
@@ -180,8 +182,8 @@ public class Main {
     }
   }
 
-  private static void runFlywayMigration(Config dbConfig) {
-    Flyway flyway = Flyway.configure().dataSource(createDatasource(dbConfig)).load();
+  private static void runFlywayMigration(DataSource datasource) {
+    Flyway flyway = Flyway.configure().dataSource(datasource).load();
     flyway.migrate();
   }
 

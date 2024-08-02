@@ -48,11 +48,7 @@ public class ChannelListener implements Runnable {
 
     while (!Thread.interrupted()) {
       try {
-        Thread.sleep(1000);
         doWorkOnce(pgConnection);
-      } catch (InterruptedException e) {
-        logger.error("", e);
-        Thread.currentThread().interrupt();
       } catch (SQLException | RuntimeException e) {
         logger.error("", e);
       }
@@ -78,7 +74,7 @@ public class ChannelListener implements Runnable {
   }
 
   private void doWorkOnce(PGConnection pgConnection) throws SQLException {
-    PGNotification[] notifications = pgConnection.getNotifications();
+    PGNotification[] notifications = pgConnection.getNotifications(1000);
     if (notifications != null) {
       Arrays.stream(notifications).forEach(notification -> {
 
