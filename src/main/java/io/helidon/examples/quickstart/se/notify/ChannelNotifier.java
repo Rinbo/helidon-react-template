@@ -1,5 +1,10 @@
 package io.helidon.examples.quickstart.se.notify;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +24,11 @@ public class ChannelNotifier {
   public void notify(Channel channel, JsonObject jsonObject) {
     logger.debug("notifying {}", channel);
 
-    dbClient.execute().createQuery("SELECT pg_notify(quote_ident(:channel), quote_literal(:payload))")
-        .addParam("channel", channel.toString())
-        .addParam("payload", jsonObject.toString())
-        .execute();
+    try (Connection connection = dbClient.unwrap(Connection.class);
+        Statement statement = connection.createStatement()) {
+      statement.execute(String.format(Locale.ROOT, "NOTIFY %s, '%s'", channel.toString(), jsonObject.toString()));
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
+    }
   }
 }

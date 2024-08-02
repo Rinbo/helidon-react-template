@@ -193,9 +193,8 @@ public class UserRepository {
         }
 
         batchStatement.executeBatch();
+        cacheInvalidatorNotifier.invalidateUser(userId);
       }
-
-      cacheInvalidatorNotifier.invalidateUser(userId);
     } catch (SQLException e) {
       throw new IllegalStateException("Role update failed", e);
     }

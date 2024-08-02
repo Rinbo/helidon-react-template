@@ -68,7 +68,7 @@ class UserServiceTest extends ServerTestBase {
   }
 
   @Test
-  void updateUserRolesTest() {
+  void updateUserRolesTest() throws InterruptedException {
     UserRepository userRepository = Contexts.globalContext().get(UserRepository.class).orElseThrow();
     User user = userRepository.findById(1).orElseThrow();
     MatcherAssert.assertThat(user.roles().size(), Matchers.is(1));
@@ -77,6 +77,7 @@ class UserServiceTest extends ServerTestBase {
     try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of(Role.USER, Role.ADMIN))) {
       MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
 
+      Thread.sleep(500); // Wait for async cache to finish invalidation
       List<Role> roles = userRepository.findById(1).orElseThrow().roles();
       MatcherAssert.assertThat(roles.size(), Matchers.is(2));
       MatcherAssert.assertThat(roles, Matchers.contains(Role.USER, Role.ADMIN));
@@ -85,6 +86,7 @@ class UserServiceTest extends ServerTestBase {
     try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of())) {
       MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
 
+      Thread.sleep(500);
       List<Role> roles = userRepository.findById(1).orElseThrow().roles();
       MatcherAssert.assertThat(roles.size(), Matchers.is(0));
       MatcherAssert.assertThat(roles.isEmpty(), Matchers.is(true));
@@ -93,6 +95,7 @@ class UserServiceTest extends ServerTestBase {
     try (Http1ClientResponse response = client.put("/api/v1/users/1/roles").submit(List.of(Role.USER, Role.ADMIN, Role.WEBMASTER))) {
       MatcherAssert.assertThat(response.status(), Matchers.is(Status.CREATED_201));
 
+      Thread.sleep(500);
       List<Role> roles = userRepository.findById(1).orElseThrow().roles();
       MatcherAssert.assertThat(roles.size(), Matchers.is(3));
       MatcherAssert.assertThat(roles, Matchers.contains(Role.USER, Role.ADMIN, Role.WEBMASTER));

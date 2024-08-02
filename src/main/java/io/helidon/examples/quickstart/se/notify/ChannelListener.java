@@ -33,6 +33,8 @@ public class ChannelListener implements Runnable {
   private static void listenToChannel(Connection connection, Channel channel) throws SQLException {
     try (Statement statement = connection.createStatement()) {
       statement.execute("LISTEN " + channel.name());
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
     }
   }
 
@@ -45,12 +47,14 @@ public class ChannelListener implements Runnable {
     logger.info("starting ChannelListener");
 
     PGConnection pgConnection = getPgConnection();
+    startListening();
 
-    while (!Thread.interrupted()) {
+    while (!Thread.currentThread().isInterrupted()) {
       try {
         doWorkOnce(pgConnection);
       } catch (SQLException | RuntimeException e) {
         logger.error("", e);
+        Thread.currentThread().interrupt();
       }
     }
 
@@ -82,7 +86,7 @@ public class ChannelListener implements Runnable {
         logger.debug("received notification with parameter: {}", notification.getParameter());
 
         Channel.fromString(notification.getName())
-            .ifPresent(channel -> channelReceiver.receive(channel, JSONB.fromJson(stripSingleQuotes(notification.getParameter()), JsonObject.class)));
+            .ifPresent(channel -> channelReceiver.receive(channel, JSONB.fromJson(notification.getParameter(), JsonObject.class)));
       });
     }
   }

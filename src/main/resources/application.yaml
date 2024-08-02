@@ -28,10 +28,18 @@ db:
     url: "jdbc:postgresql://localhost:5432/hr_template?useSSL=false"
     username: "postgres"
     password: "postgres"
-  pool:
-    connection-timeout: 3000
-    max-pool-size: 10
-    min-idle: 2
+    poolName: db-client-pool
+    initializationFailTimeout: -1
+    connectionTimeout: 3000
+    helidon:
+      pool-metrics:
+        enabled: true
+        name-prefix: "hikari."
+  health-check:
+    type: "query"
+    statementName: "health-check"
+  statements:
+    health-check: "SELECT 1"
 
 app:
   profile: "dev"

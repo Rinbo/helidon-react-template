@@ -32,10 +32,7 @@ public abstract class ServerTestBase {
         "db.source", "jdbc",
         "db.connection.url", postgres.getJdbcUrl(),
         "db.connection.username", postgres.getUsername(),
-        "db.connection.password", postgres.getPassword(),
-        "db.pool.connection-timeout", "3000",
-        "db.pool.max-pool-size", "10",
-        "db.pool.min-idle", "2"
+        "db.connection.password", postgres.getPassword()
     )));
 
     Main.setup(config);

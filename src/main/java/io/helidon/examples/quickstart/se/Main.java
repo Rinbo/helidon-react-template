@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -17,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.util.DriverDataSource;
 
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
@@ -101,10 +101,10 @@ public class Main {
 
   static void setupPgNotifications(DataSource datasource) {
     Contexts.globalContext().register(new CacheInvalidatorNotifier(new ChannelNotifier()));
+
     try {
       Connection connection = datasource.getConnection();
       ChannelListener channelListener = new ChannelListener(connection, new ChannelReceiver());
-      channelListener.startListening();
       Thread thread = new Thread(channelListener);
       thread.start();
     } catch (SQLException e) {
@@ -124,15 +124,21 @@ public class Main {
   }
 
   private static DataSource createDatasource(Config dbConfig) {
-    HikariConfig hikariConfig = new HikariConfig();
-    hikariConfig.setJdbcUrl(dbConfig.get("connection.url").asString().get());
-    hikariConfig.setUsername(dbConfig.get("connection.username").asString().get());
-    hikariConfig.setPassword(dbConfig.get("connection.password").asString().get());
-    hikariConfig.setMaximumPoolSize(dbConfig.get("pool.max-pool-size").asInt().get());
-    hikariConfig.setMinimumIdle(dbConfig.get("pool.min-idle").asInt().get());
-    hikariConfig.setConnectionTimeout(dbConfig.get("pool.connection-timeout").asLong().get());
+    return new DriverDataSource(
+        dbConfig.get("connection.url").asString().get(),
+        getPostgresDriverClassName(),
+        new Properties(),
+        dbConfig.get("connection.username").asString().get(),
+        dbConfig.get("connection.password").asString().get()
+    );
+  }
 
-    return new HikariDataSource(hikariConfig);
+  private static String getPostgresDriverClassName() {
+    try {
+      return Class.forName("org.postgresql.Driver").getName();
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("postgres driver is required", e);
+    }
   }
 
   private static void handleException(ServerRequest req, ServerResponse res, Exception exception) {
