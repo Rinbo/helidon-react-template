@@ -1,13 +1,12 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect, useFetcher, useLoaderData, useParams } from "react-router-dom";
 import ContextMenu from "../../components/navigation/context-menu.tsx";
-import React from "react";
+import React, { useRef } from "react";
 import { fetcher } from "../../utils/http.ts";
 import { ROLE_LIST, User } from "./users-layout.tsx";
 import toast from "react-hot-toast";
 import Avatar from "../../components/avatar.tsx";
 import { MdDeleteForever, MdEmail } from "react-icons/md";
 import ButtonIcon from "../../components/navigation/button-icon.tsx";
-import Modal, { closeModal } from "../../components/modals/modal.tsx";
 import { LiaUserEditSolid } from "react-icons/lia";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,24 +78,38 @@ export default function UserView() {
 }
 
 function DeleteAction() {
+  const modalRef = useRef<HTMLDialogElement>(null);
   const fetcher = useFetcher();
   const { userId } = useParams();
 
+  function openModal() {
+    modalRef.current?.showModal();
+  }
+
+  function closeModal() {
+    modalRef.current?.close();
+  }
+
   return (
-    <Modal actionElement={<ButtonIcon icon={<MdDeleteForever className="text-2xl text-warning sm:text-3xl" />} tooltip="Delete user" />}>
-      <h3 className="text-xl font-bold">Remove User</h3>
-      <p className="py-4">Are you sure you want to delete this user?</p>
-      <div className="modal-action">
-        <fetcher.Form method="delete" action={`/users/${userId}/delete`} className="flex flex-row items-end gap-4">
-          <button type="button" className="btn" onClick={closeModal}>
-            Cancel
-          </button>
-          <button className="btn btn-warning" type="submit">
-            Delete
-          </button>
-        </fetcher.Form>
-      </div>
-    </Modal>
+    <React.Fragment>
+      <ButtonIcon action={openModal} icon={<MdDeleteForever />} tooltip="Delete user" />
+      <dialog ref={modalRef} className="modal">
+        <div className="modal-box">
+          <h3 className="text-xl font-bold">Remove User</h3>
+          <p className="py-4">Are you sure you want to delete this user?</p>
+          <div className="modal-action gap-2">
+            <fetcher.Form method="delete" action={`/users/${userId}/delete`} className="flex flex-row items-end gap-4">
+              <button type="button" className="btn" onClick={closeModal}>
+                Cancel
+              </button>
+              <button className="btn btn-warning" type="submit">
+                Delete
+              </button>
+            </fetcher.Form>
+          </div>
+        </div>
+      </dialog>
+    </React.Fragment>
   );
 }
 
@@ -108,10 +121,10 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 function EditAction({ user }: { user: User }) {
+  const modalRef = useRef<HTMLDialogElement>(null);
   const { register, handleSubmit, formState } = useForm<Schema>({ resolver: zodResolver(schema), defaultValues: user });
   const { userId } = useParams();
   const fetcher = useFetcher();
-
   const roles = user.roles;
 
   function onSubmit(data: Schema) {
@@ -119,28 +132,41 @@ function EditAction({ user }: { user: User }) {
     closeModal();
   }
 
+  function openModal() {
+    modalRef.current?.showModal();
+  }
+
+  function closeModal() {
+    modalRef.current?.close();
+  }
+
   return (
-    <Modal actionElement={<ButtonIcon icon={<LiaUserEditSolid className="text-2xl text-accent sm:text-3xl" />} tooltip="Edit user" />}>
-      <h3 className="mb-4 text-xl font-bold">Edit User</h3>
-      <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <TextInput register={register("name")} error={formState.errors.name?.message} />
-        <select className="select select-bordered p-4" multiple defaultValue={roles} {...register("roles")}>
-          {ROLE_LIST.map((role) => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
-        <div className="modal-action gap-2">
-          <button type="button" className="btn btn-outline" onClick={closeModal}>
-            Cancel
-          </button>
-          <button className="btn btn-warning" type="submit" disabled={fetcher.state !== "idle"}>
-            Save
-          </button>
+    <React.Fragment>
+      <ButtonIcon action={openModal} icon={<LiaUserEditSolid />} tooltip="Edit user" />
+      <dialog ref={modalRef} className="modal">
+        <div className="modal-box">
+          <h3 className="mb-4 text-xl font-bold">Edit User</h3>
+          <fetcher.Form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <TextInput register={register("name")} error={formState.errors.name?.message} />
+            <select className="select select-bordered p-4" multiple defaultValue={roles} {...register("roles")}>
+              {ROLE_LIST.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+            <div className="modal-action gap-2">
+              <button type="button" className="btn btn-outline" onClick={closeModal}>
+                Cancel
+              </button>
+              <button className="btn btn-warning" type="submit" disabled={fetcher.state !== "idle"}>
+                Save
+              </button>
+            </div>
+          </fetcher.Form>
         </div>
-      </fetcher.Form>
-    </Modal>
+      </dialog>
+    </React.Fragment>
   );
 }
 

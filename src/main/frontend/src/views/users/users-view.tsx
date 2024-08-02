@@ -13,7 +13,7 @@ export default function UsersView() {
     <div className="flex h-full flex-col items-center gap-2">
       <ContextMenu>
         <RequireAdmin>
-          <IconLink to={"/users/new"} tooltip="Add user" icon={<IoAddCircleSharp className="text-2xl text-accent sm:text-3xl" />} />
+          <IconLink to={"/users/new"} tooltip="Add user" icon={<IoAddCircleSharp />} />
         </RequireAdmin>
       </ContextMenu>
       <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">

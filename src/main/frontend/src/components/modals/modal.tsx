@@ -1,13 +1,13 @@
 import React, { PropsWithChildren, ReactElement, useRef } from "react";
 
-export const closeModal = () => {
-  const modal = document.querySelector("dialog.modal") as HTMLDialogElement | null;
+export const closeModal = (id: string) => {
+  const modal = document.querySelector("#" + id) as HTMLDialogElement | null;
   if (modal) modal.close();
 };
 
-type Props = { actionElement: ReactElement } & PropsWithChildren;
+type Props = { actionElement: ReactElement; id: string } & PropsWithChildren;
 
-export default function Modal({ actionElement, children }: Props) {
+export default function Modal({ actionElement, children, id }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   function onClick() {
@@ -19,7 +19,7 @@ export default function Modal({ actionElement, children }: Props) {
   return (
     <React.Fragment>
       {wrappedActionElement}
-      <dialog ref={modalRef} className="modal">
+      <dialog id={id} ref={modalRef} className="modal">
         <div className="modal-box">{children}</div>
       </dialog>
     </React.Fragment>

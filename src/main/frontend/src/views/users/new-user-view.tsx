@@ -1,11 +1,19 @@
 import React from "react";
 import ContextMenu from "../../components/navigation/context-menu.tsx";
 import RegistrationForm from "../registration/registration-form.tsx";
-import { ActionFunctionArgs, redirect } from "react-router-dom";
+import { ActionFunctionArgs, json, redirect } from "react-router-dom";
 import { fetcher } from "../../utils/http.ts";
+import toast from "react-hot-toast";
 
 export async function action({ request }: ActionFunctionArgs) {
-  await fetcher({ path: "/api/v1/users", method: "POST", body: await request.json() });
+  const response = await fetcher({ path: "/api/v1/users", method: "POST", body: await request.json() });
+
+  if (!response.ok) {
+    toast.error("Registration failed");
+    return json(null);
+  }
+
+  toast.success("New user created");
   return redirect("/users");
 }
 
