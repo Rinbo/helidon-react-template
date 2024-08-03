@@ -2,7 +2,6 @@ package io.helidon.examples.quickstart.se.security;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +20,7 @@ import io.helidon.examples.quickstart.se.data.repository.SessionRepository;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.LoginForm;
 import io.helidon.examples.quickstart.se.dto.RegistrationForm;
+import io.helidon.examples.quickstart.se.email.EmailSender;
 import io.helidon.examples.quickstart.se.utils.Either;
 import io.helidon.examples.quickstart.se.utils.SessionUtils;
 import io.helidon.examples.quickstart.se.utils.Validate;
@@ -39,22 +39,14 @@ public class AuthService implements HttpService {
   private final AuthRepository authRepository;
   private final SessionRepository sessionRepository;
   private final UserRepository userRepository;
-
-  public AuthService(AuthRepository authRepository, SessionRepository sessionRepository, UserRepository userRepository) {
-    Objects.requireNonNull(authRepository, "authRepository is required");
-    Objects.requireNonNull(sessionRepository, "sessionRepository is required");
-    Objects.requireNonNull(userRepository, "userRepository is required");
-
-    this.authRepository = authRepository;
-    this.sessionRepository = sessionRepository;
-    this.userRepository = userRepository;
-  }
+  private final EmailSender emailSender;
 
   public AuthService() {
     Context context = Contexts.globalContext();
     authRepository = context.get(AuthRepository.class).orElseThrow();
     sessionRepository = context.get(SessionRepository.class).orElseThrow();
     userRepository = context.get(UserRepository.class).orElseThrow();
+    emailSender = new EmailSender();
   }
 
   private static List<String> getCookiesStrings(ServerRequest request) {
@@ -105,6 +97,7 @@ public class AuthService implements HttpService {
 
   private void generateAndSendMagicLink(String email) {
     Passcode passcode = authRepository.generateAndGetLoginPasscode(email);
+    emailSender.sendEmail(email, passcode);
 
     logger.info("SENDING PASSCODE {} TO {}: ", passcode, email);
   }

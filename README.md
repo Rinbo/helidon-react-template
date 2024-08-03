@@ -17,11 +17,11 @@
 - [x] User cache
 - [x] Error boundary
 - [x] Db cleanup jobs with FOR UPDATE SKIP LOCKED - Intention to only run on leader
-- [ ] User CRUD
-- [ ] Postgres notify
+- [x] User CRUD
+- [x] Postgres notify
 - [ ] Security Integration Test
 - [ ] Add Last login/authentication to user table
-
+- [x] Email Service - log locally - attach role to EC2 Instance
 
 Sample Helidon SE project that includes multiple REST operations.
 
