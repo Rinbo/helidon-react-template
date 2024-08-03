@@ -1,9 +1,10 @@
 
 # 1st stage, build the app
-FROM container-registry.oracle.com/java/jdk-no-fee-term:21 as build
+FROM ghcr.io/graalvm/graalvm-community:21.0.0-ol9 as build
+
+WORKDIR /usr/share
 
 # Install maven
-WORKDIR /usr/share
 RUN set -x && \
     curl -O https://archive.apache.org/dist/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz && \
     tar -xvf apache-maven-*-bin.tar.gz  && \
@@ -17,23 +18,22 @@ WORKDIR /helidon
 # Incremental docker builds will always resume after that, unless you update
 # the pom
 ADD pom.xml .
-RUN mvn package -Dmaven.test.skip -Declipselink.weave.skip 
+RUN mvn package -Pnative-image -Dnative.image.skip -Dmaven.test.skip -Declipselink.weave.skip
 
 # Do the Maven build!
 # Incremental docker builds will resume here when you change sources
 ADD src src
-RUN mvn package -DskipTests
+RUN mvn package -Pnative-image -Dnative.image.buildStatic -DskipTests
 
 RUN echo "done!"
 
 # 2nd stage, build the runtime image
-FROM container-registry.oracle.com/java/jdk-no-fee-term:21
+FROM scratch
 WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
-COPY --from=build /helidon/target/helidon-quickstart-se.jar ./
-COPY --from=build /helidon/target/libs ./libs
+COPY --from=build /helidon/target/helidon-quickstart-se .
 
-CMD ["java", "-jar", "helidon-quickstart-se.jar"]
+ENTRYPOINT ["./helidon-quickstart-se"]
 
 EXPOSE 8080
