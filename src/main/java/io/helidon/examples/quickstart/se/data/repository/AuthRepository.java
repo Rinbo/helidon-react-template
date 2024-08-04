@@ -103,6 +103,7 @@ public class AuthRepository {
           .findFirst();
 
       transaction.update("UPDATE login_passcode SET attempts = attempts + 1 WHERE email = ?", email);
+      transaction.update("UPDATE users SET last_login = now() WHERE email = ?", email);
       transaction.commit();
 
       if (optional.isEmpty()) return Either.left(new IllegalStateException("User has no active login passcodes. Please request a new one"));

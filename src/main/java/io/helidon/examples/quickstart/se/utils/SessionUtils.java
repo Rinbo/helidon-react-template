@@ -23,7 +23,7 @@ public final class SessionUtils {
         .path("/")
         .expires(Instant.now().plusSeconds(Constants.SESSION_DURATION.toSeconds()))
         .httpOnly(true)
-        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("dev"))
+        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("local"))
         .sameSite(SetCookie.SameSite.STRICT)
         .build();
   }
@@ -33,7 +33,7 @@ public final class SessionUtils {
         .path("/")
         .maxAge(Duration.ZERO)
         .httpOnly(true)
-        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("dev"))
+        .secure(!Config.global().get("app.profile").asString().orElse("unknown").equals("local"))
         .sameSite(SetCookie.SameSite.STRICT)
         .build();
   }

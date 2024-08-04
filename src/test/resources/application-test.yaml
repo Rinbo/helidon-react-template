@@ -1,0 +1,17 @@
+server:
+  features:
+    security:
+      defaults:
+        authenticate: true
+      paths:
+        - path: "/api/*"
+        - path: "/api/v1/users/*"
+          methods: [ "put","delete", "post" ]
+          roles-allowed: [ "ADMIN" ]
+        - path: "/auth/web/logout"
+security:
+  providers:
+    - atn:
+      class: io.helidon.examples.quickstart.se.security.AtnProvider
+    - atz:
+      class: io.helidon.examples.quickstart.se.security.AtzProvider

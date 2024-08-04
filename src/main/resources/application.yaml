@@ -30,7 +30,4 @@ db:
     password: "postgres"
 
 app:
-  profile: "dev"
-  frontend:
-    url: "http://localhost:5173"
-
+  profile: "local"

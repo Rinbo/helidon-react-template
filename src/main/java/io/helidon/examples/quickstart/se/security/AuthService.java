@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import io.helidon.common.context.Context;
 import io.helidon.common.context.Contexts;
 import io.helidon.common.media.type.MediaTypes;
+import io.helidon.config.Config;
 import io.helidon.examples.quickstart.se.data.model.LoginPasscode;
 import io.helidon.examples.quickstart.se.data.model.Passcode;
 import io.helidon.examples.quickstart.se.data.model.Session;
@@ -97,7 +98,10 @@ public class AuthService implements HttpService {
 
   private void generateAndSendMagicLink(String email) {
     Passcode passcode = authRepository.generateAndGetLoginPasscode(email);
-    emailSender.sendEmail(email, passcode);
+
+    if (!Config.global().get("app.profile").asString().orElse("unknown").equals("local")) {
+      emailSender.sendEmail(email, passcode);
+    }
 
     logger.info("SENDING PASSCODE {} TO {}: ", passcode, email);
   }
