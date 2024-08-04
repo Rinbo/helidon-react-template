@@ -25,21 +25,9 @@ security:
 db:
   source: "jdbc"
   connection:
-    url: "jdbc:postgresql://localhost:5432/hr_template?useSSL=false"
+    url: "jdbc:postgresql://localhost:5432/hr_template"
     username: "postgres"
     password: "postgres"
-    poolName: db-client-pool
-    initializationFailTimeout: -1
-    connectionTimeout: 3000
-    helidon:
-      pool-metrics:
-        enabled: true
-        name-prefix: "hikari."
-  health-check:
-    type: "query"
-    statementName: "health-check"
-  statements:
-    health-check: "SELECT 1"
 
 app:
   profile: "dev"

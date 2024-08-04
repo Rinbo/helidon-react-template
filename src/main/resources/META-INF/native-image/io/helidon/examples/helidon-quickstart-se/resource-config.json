@@ -1,0 +1,170 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/helidon/feature-metadata.properties\\E"
+  }, {
+    "pattern":"\\QMETA-INF/helidon/media-types.properties\\E"
+  }, {
+    "pattern":"\\QMETA-INF/helidon/serial-config.properties\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.common.configurable.spi.ExecutorServiceSupplierObserver\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.common.context.spi.DataPropagationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.common.mapper.spi.MapperProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.common.media.type.spi.MediaTypeDetector\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.common.tls.spi.TlsManagerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.config.spi.ConfigFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.config.spi.ConfigMapperProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.config.spi.ConfigParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.dbclient.hikari.spi.HikariMetricsProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.dbclient.jdbc.spi.JdbcConnectionPoolProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.dbclient.spi.DbClientProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.dbclient.spi.DbClientServiceProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.dbclient.spi.DbMapperProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.http.encoding.spi.ContentEncodingProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.http.media.spi.MediaSupportProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.logging.common.spi.LoggingProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.metrics.providers.micrometer.spi.SpanContextSupplierProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.metrics.spi.MeterRegistryLifeCycleListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.metrics.spi.MetersProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.metrics.spi.MetricsFactoryProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.metrics.spi.MetricsProgrammaticConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.security.spi.SecurityProviderService\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.webserver.http1.spi.Http1UpgradeProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.webserver.observe.spi.ObserveProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.webserver.spi.ProtocolConfigProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.webserver.spi.ServerConnectionSelectorProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.helidon.webserver.spi.ServerFeatureProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.el.ExpressionFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.json.bind.spi.JsonbProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.json.spi.JsonProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.validation.ConstraintValidator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.validation.spi.ValidationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jakarta.validation.valueextraction.ValueExtractor\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.sql.Driver\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.commons.logging.LogFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.eclipse.yasson.spi.JsonbComponentInstanceCreator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.flywaydb.core.extensibility.Plugin\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.jboss.logging.LoggerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/software.amazon.awssdk.http.SdkHttpService\\E"
+  }, {
+    "pattern":"\\QMETA-INF/validation.xml\\E"
+  }, {
+    "pattern":"\\Qapplication.yaml\\E"
+  }, {
+    "pattern":"\\Qcommons-logging.properties\\E"
+  }, {
+    "pattern":"\\Qconfig-profile.conf\\E"
+  }, {
+    "pattern":"\\Qconfig-profile.json\\E"
+  }, {
+    "pattern":"\\Qconfig-profile.properties\\E"
+  }, {
+    "pattern":"\\Qconfig-profile.yaml\\E"
+  }, {
+    "pattern":"\\Qconfig-profile.yml\\E"
+  }, {
+    "pattern":"\\Qdb/callback\\E"
+  }, {
+    "pattern":"\\Qdb/migration/V1__create_user_and_authorities.sql\\E"
+  }, {
+    "pattern":"\\Qdb/migration/V2__login_token_table.sql\\E"
+  }, {
+    "pattern":"\\Qdb/migration/V3__create_sessions_table.sql\\E"
+  }, {
+    "pattern":"\\Qdb/migration/V4__create_schedule_lock_table.sql\\E"
+  }, {
+    "pattern":"\\Qdb/migration\\E"
+  }, {
+    "pattern":"\\Qio/helidon/common/media/type/default-media-types.properties\\E"
+  }, {
+    "pattern":"\\Qjndi.properties\\E"
+  }, {
+    "pattern":"\\Qlogback-test.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback-test.xml\\E"
+  }, {
+    "pattern":"\\Qlogback.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback.xml\\E"
+  }, {
+    "pattern":"\\Qmeta-config.conf\\E"
+  }, {
+    "pattern":"\\Qmeta-config.json\\E"
+  }, {
+    "pattern":"\\Qmeta-config.properties\\E"
+  }, {
+    "pattern":"\\Qmeta-config.yaml\\E"
+  }, {
+    "pattern":"\\Qmeta-config.yml\\E"
+  }, {
+    "pattern":"\\Qmozilla/public-suffix-list.txt\\E"
+  }, {
+    "pattern":"\\Qorg/flywaydb/core/internal/version.txt\\E"
+  }, {
+    "pattern":"\\Qorg/postgresql/driverconfig.properties\\E"
+  }, {
+    "pattern":"\\Qsoftware/amazon/awssdk/global/handlers/execution.interceptors\\E"
+  }, {
+    "pattern":"\\Qsoftware/amazon/awssdk/services/ses/execution.interceptors\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
+  }]},
+  "bundles":[{
+    "name":"yasson-messages",
+    "locales":[""]
+  }]
+}

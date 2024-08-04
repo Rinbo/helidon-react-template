@@ -24,6 +24,7 @@
     <testcontainers.version>1.20.0</testcontainers.version>
     <mockito.version>5.12.0</mockito.version>
     <aws-sdk.version>2.26.28</aws-sdk.version>
+    <skipFrontend>false</skipFrontend>
   </properties>
 
   <dependencyManagement>
@@ -294,6 +295,7 @@
             <configuration>
               <nodeVersion>v20.14.0</nodeVersion>
               <npmVersion>10.7.0</npmVersion>
+              <skip>${skipFrontend}</skip>
             </configuration>
           </execution>
 
@@ -306,6 +308,7 @@
             <phase>generate-resources</phase>
             <configuration>
               <arguments>install</arguments>
+              <skip>${skipFrontend}</skip>
             </configuration>
           </execution>
 
@@ -324,6 +327,7 @@
         <configuration>
           <nodeVersion>v20.14.0</nodeVersion>
           <workingDirectory>src/main/frontend</workingDirectory>
+          <skip>${skipFrontend}</skip>
         </configuration>
       </plugin>
 

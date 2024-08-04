@@ -1,6 +1,6 @@
 
 # 1st stage, build the app
-FROM ghcr.io/graalvm/graalvm-community:21.0.0-ol9 as build
+FROM ghcr.io/graalvm/graalvm-community:21.0.0-ol9 AS build
 
 WORKDIR /usr/share
 
@@ -18,7 +18,7 @@ WORKDIR /helidon
 # Incremental docker builds will always resume after that, unless you update
 # the pom
 ADD pom.xml .
-RUN mvn package -Pnative-image -Dnative.image.skip -Dmaven.test.skip -Declipselink.weave.skip
+RUN mvn package -Pnative-image -Dnative.image.skip -Dmaven.test.skip -Declipselink.weave.skip -DskipFrontend=true
 
 # Do the Maven build!
 # Incremental docker builds will resume here when you change sources
@@ -33,6 +33,8 @@ WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
 COPY --from=build /helidon/target/helidon-quickstart-se .
+#RUN ls -la /helidon
+#RUN chmod +x /helidon/target/helidon-quickstart-se
 
 ENTRYPOINT ["./helidon-quickstart-se"]
 

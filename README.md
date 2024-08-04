@@ -23,6 +23,8 @@
 - [ ] Add Last login/authentication to user table
 - [x] Email Service - log locally - attach role to EC2 Instance
 
+TOMORROW: TRY BUILDING NATIVE WITH A NEWER VERSION OF GRAALVM
+
 Sample Helidon SE project that includes multiple REST operations.
 
 ## Build and run
@@ -114,7 +116,28 @@ docker run --rm -p 8080:8080 helidon-quickstart-se:latest
 ## Deploy to fly.io
 
 1. Create application in fly.io
-   - fly
+   - fly launch -r arn --name borjessons-dev
+   - fly postgres create -r arn --name borjessons-dev-db
+   - fly postgres attach --app borjessons-dev borjessons-dev-db
+   - fly secrets set DB_CONNECTION_URL=postgres://hostname:port/dbname -a borjessons-dev
+   - fly secrets set DB_CONNECTION_USERNAME=xxx -a borjessons-dev
+   - fly secrets set DB_CONNECTION_PASSWORD=xxx -a borjessons-dev
+   - fly secrets set AWS_REGION=eu-north-1 -a borjessons-dev
+   - fly secrets set AWS_ACCESS_KEY_ID=xxx -a borjessons-dev
+   - fly secrets set AWS_SECRET_ACCESS_KEY=xxx -a borjessons-dev
+   - fly deploy
+   - fly tokens create deploy -x 999999h
+   - Add token to gh actions with name FLY_API_TOKEN
+
 2. Add Dockerfile as listed in root (update with app name)
-2. 
+
+## Native image troubleshooting
+If for whatever reason the native image is failing to be built try the following
+- See if more `--initialize-at-build-time` needs to added to `native-image.properties`
+- Package a jar normally: `mvn clean install`
+- Run the following: `java -agentlib:native-image-agent=config-output-dir=META-INF/native-image -jar target/helidon-quickstart-se.jar`
+- Copy output in the META-INF created in root to the META-INF folder in the `/resources` folder
+- Switch to GraalVM and try building again `mvn clean package -Pnative-image -DskipTests`
+- Try running it locally `./target/helidon-quickstart-se`
+
 
