@@ -114,20 +114,22 @@ docker build -t helidon-quickstart-se .
 docker run --rm -p 8080:8080 helidon-quickstart-se:latest
 ```
 ## Deploy to fly.io
+Unfortunately flyway migrations are not supported on native images so we have to go with normal jar deployment in a docker image.
 
 1. Create application in fly.io
    - fly launch -r arn --name borjessons-dev
    - fly postgres create -r arn --name borjessons-dev-db
    - fly postgres attach --app borjessons-dev borjessons-dev-db
-   - fly secrets set DB_CONNECTION_URL=postgres://hostname:port/dbname -a borjessons-dev
+   - fly secrets set DB_CONNECTION_URL=jdbc:postgresql://borjessons-dev-db.flycast:5432/borjessons_dev?useSSL=false -a borjessons-dev
    - fly secrets set DB_CONNECTION_USERNAME=xxx -a borjessons-dev
    - fly secrets set DB_CONNECTION_PASSWORD=xxx -a borjessons-dev
    - fly secrets set AWS_REGION=eu-north-1 -a borjessons-dev
    - fly secrets set AWS_ACCESS_KEY_ID=xxx -a borjessons-dev
    - fly secrets set AWS_SECRET_ACCESS_KEY=xxx -a borjessons-dev
-   - fly deploy
+   - fly deploy --local-only
    - fly tokens create deploy -x 999999h
    - Add token to gh actions with name FLY_API_TOKEN
+   - Update fly-deploy.yml line 16 to `- run: flyctl deploy --local-only` to build the image on gh machine instead of the fly machine (more memory)
 
 2. Add Dockerfile as listed in root (update with app name)
 

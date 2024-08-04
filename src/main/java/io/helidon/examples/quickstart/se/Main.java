@@ -150,7 +150,7 @@ public class Main {
       case ConstraintViolationException e -> res.status(Status.BAD_REQUEST_400).send(ErrorResponse.of("Unable to parse request", e.getMessage()));
       case NoSuchElementException e -> res.status(Status.NOT_FOUND_404).send(ErrorResponse.of("Unable to find resource", e.getMessage()));
       case HttpException e -> res.status(e.status()).send(ErrorResponse.of(e.getMessage(), e.getMessage()));
-      default -> res.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("internal server error", exception.getMessage()));
+      default -> res.status(Status.INTERNAL_SERVER_ERROR_500).send();
     }
   }
 

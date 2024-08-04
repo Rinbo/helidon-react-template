@@ -12,7 +12,6 @@ import io.helidon.examples.quickstart.se.data.model.Role;
 import io.helidon.examples.quickstart.se.data.model.User;
 import io.helidon.examples.quickstart.se.data.repository.UserRepository;
 import io.helidon.examples.quickstart.se.dto.EditUserForm;
-import io.helidon.examples.quickstart.se.dto.ErrorResponse;
 import io.helidon.examples.quickstart.se.dto.RegistrationForm;
 import io.helidon.http.Status;
 import io.helidon.webserver.http.HttpRules;
@@ -57,7 +56,7 @@ public class UserService implements HttpService {
     int userId = request.path().pathParameters().first("userId").asInt().orElseThrow();
 
     if (!userRepository.deleteById(userId)) {
-      response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("Failed to delete user"));
+      response.status(Status.INTERNAL_SERVER_ERROR_500).send();
       return;
     }
 
@@ -69,7 +68,7 @@ public class UserService implements HttpService {
     EditUserForm editUserForm = request.content().as(EditUserForm.class);
 
     if (!userRepository.updateUser(userId, editUserForm)) {
-      response.status(Status.INTERNAL_SERVER_ERROR_500).send(ErrorResponse.of("User could not be updated"));
+      response.status(Status.INTERNAL_SERVER_ERROR_500).send();
       return;
     }
 
