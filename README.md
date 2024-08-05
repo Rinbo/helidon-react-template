@@ -1,9 +1,36 @@
-# helidon-quickstart-se
+# helidon-react-template
+This repository contains a full stack web application template with a Java Helidon SE backend and React frontend.
+The intention with the template is to allow users to get going faster with new projects. The following has been set up:
 
+- Security module with cookie based access control
+- Password-less authentication where a login code is emailed to user (valid for 5 minutes)
+- Role based authorization
+- Flyway database migration and schema management
+- Local session and user caching
+- Cache invalidation by use of Postgres notify (to allow for horizontal scaling)
+- Frontend routing with react-router
+- Toast/flash messages for user notifications
+- Same site serving of frontend and backend through the use of `frontend-maven-plugin`
+- TailwindCSS and daisyUI for styling
+
+## Local development
+- Create a postgres database (eg. in docker), and add connection details to `applicaiton.yaml`
+- Start backend from Intellij
+- cd to `src/main/frontend` and run `npm run dev`
+- Open browser and navigate to `localhost:5173` (only in dev mode)
+- When building the project either as jar or native image, frontend and backend will be served from port `8080` (default)
+
+## Production build
+App can be built either as a jar or native image. However, as of the time of writing this Flyway does not work with native images.
+
+```bash
+mvn package
+java -jar target/helidon-quickstart-se.jar
+```
+Navigate to `localhost:8080`
 
 ## Deploy to fly.io
-Unfortunately flyway migrations are not supported on native images, so we have to go with normal jar deployment in a docker image.
-
+Obviously you need a Fly.io account with their CLI installed in your terminal. Fly.toml and GitHub Action script will be created automatically when running below commands:
 - fly launch -r arn --name app-name
 - fly postgres create -r arn --name app-name-db
 - fly postgres attach --app app-name app-name-db
@@ -18,13 +45,6 @@ Unfortunately flyway migrations are not supported on native images, so we have t
 - fly tokens create deploy -x 999999h
 - Add token to gh actions with name FLY_API_TOKEN
 - Update fly-deploy.yml line 16 to `- run: flyctl deploy --local-only` to build the image on gh machine instead of the fly machine (more memory)
-
-## Build and run
-
-```bash
-mvn package
-java -jar target/helidon-quickstart-se.jar
-```
 
 ## Try metrics
 
