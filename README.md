@@ -1,41 +1,19 @@
 # helidon-quickstart-se
 
-# TODO
-- [x] Batch update (roles)
-- [x] Unit testing
-- [x] Integration testing
-- [x] Pagination (improved version)
-- [x] Authentication (magic link)
-- [x] Authorization
-- [x] Fix react-router browser router
-- [x] Login with code instead of magic link.
-- [x] Frontend layout
-- [x] Implement awesome navigation
-- [x] Toast
-- [x] Max retries in login_passcode
-- [x] Write repository integration test for authentication brute force attacks 
-- [x] User cache
-- [x] Error boundary
-- [x] Db cleanup jobs with FOR UPDATE SKIP LOCKED - Intention to only run on leader
-- [x] User CRUD
-- [x] Postgres notify
-- [x] Email Service - log locally - attach role to EC2 Instance
-- [x] Add Last login/authentication to user table
-- [x] Security Integration Test
 
 ## Deploy to fly.io
 Unfortunately flyway migrations are not supported on native images, so we have to go with normal jar deployment in a docker image.
 
-- fly launch -r arn --name borjessons-dev
-- fly postgres create -r arn --name borjessons-dev-db
-- fly postgres attach --app borjessons-dev borjessons-dev-db
-- fly secrets set DB_CONNECTION_URL=jdbc:postgresql://borjessons-dev-db.flycast:5432/borjessons_dev?useSSL=false -a borjessons-dev
-- fly secrets set DB_CONNECTION_USERNAME=xxx -a borjessons-dev
-- fly secrets set DB_CONNECTION_PASSWORD=xxx -a borjessons-dev
-- fly secrets set AWS_REGION=eu-north-1 -a borjessons-dev
-- fly secrets set AWS_ACCESS_KEY_ID=xxx -a borjessons-dev
-- fly secrets set AWS_SECRET_ACCESS_KEY=xxx -a borjessons-dev
-- fly secrets set APP_PROFILE=PROD -a borjessons-dev
+- fly launch -r arn --name app-name
+- fly postgres create -r arn --name app-name-db
+- fly postgres attach --app app-name app-name-db
+- fly secrets set DB_CONNECTION_URL=jdbc:postgresql://app-name-db.flycast:5432/app_name?useSSL=false -a app-name
+- fly secrets set DB_CONNECTION_USERNAME=xxx -a app-name
+- fly secrets set DB_CONNECTION_PASSWORD=xxx -a app-name
+- fly secrets set AWS_REGION=eu-north-1 -a app-name
+- fly secrets set AWS_ACCESS_KEY_ID=xxx -a app-name
+- fly secrets set AWS_SECRET_ACCESS_KEY=xxx -a app-name
+- fly secrets set APP_PROFILE=PROD -a app-name
 - fly deploy --local-only
 - fly tokens create deploy -x 999999h
 - Add token to gh actions with name FLY_API_TOKEN
