@@ -2,9 +2,6 @@ package io.helidon.examples.quickstart.se.security;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.helidon.http.PathMatcher;
 import io.helidon.http.PathMatchers;
 import io.helidon.webserver.http.Filter;
@@ -25,7 +22,6 @@ public class AuthFilter implements Filter {
   private static final PathMatcher FILES = PathMatchers.create("/{file}");
 
   private static final List<PathMatcher> EXCLUDED_PATHS = List.of(AUTHENTICATE, LOGIN, LOGOUT, REGISTER, ROOT, ASSETS, FILES);
-  private static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
   private AuthFilter() {
   }

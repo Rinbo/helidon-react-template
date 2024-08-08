@@ -41,6 +41,9 @@ import io.helidon.examples.quickstart.se.notify.ChannelReceiver;
 import io.helidon.examples.quickstart.se.security.AuthFilter;
 import io.helidon.examples.quickstart.se.security.AuthService;
 import io.helidon.examples.quickstart.se.service.v1.UserService;
+import io.helidon.http.Header;
+import io.helidon.http.HeaderNames;
+import io.helidon.http.HeaderValues;
 import io.helidon.http.HttpException;
 import io.helidon.http.Status;
 import io.helidon.logging.common.LogConfig;
@@ -55,6 +58,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 
 public class Main {
+  private static final Header ASSET_UI_REDIRECT = HeaderValues.createCached(HeaderNames.LOCATION, "/asset/ui");
+  private static final Header UI_REDIRECT = HeaderValues.createCached(HeaderNames.LOCATION, "/ui");
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
   private Main() {
@@ -74,13 +79,15 @@ public class Main {
         .start();
   }
 
-  static void configureRouting(HttpRouting.Builder routing) {
-    routing
+  static void configureRouting(HttpRouting.Builder router) {
+    router
+        .any("/", (_req, res) -> redirectTo(res, UI_REDIRECT))
+        .any("/assets/*", (req, res) -> redirectTo(res, HeaderValues.createCached(HeaderNames.LOCATION, "/ui" + req.path().path())))
         .addFilter(AuthFilter.create())
         .register("/auth/web", new AuthService())
         .register("/api/v1", new UserService())
-        .register(StaticContentService.builder("/web").welcomeFileName("index.html").build())
-        .register("/{+path}", rules -> rules.get(Main::serveReactApp))
+        .register("/ui", StaticContentService.builder("/web").welcomeFileName("index.html").build())
+        .register("/ui/{+path}", rules -> rules.get(Main::serveReactApp))
         .error(Exception.class, Main::handleException);
   }
 
@@ -152,6 +159,12 @@ public class Main {
       case HttpException e -> res.status(e.status()).send(ErrorResponse.of(e.getMessage(), e.getMessage()));
       default -> res.status(Status.INTERNAL_SERVER_ERROR_500).send();
     }
+  }
+
+  private static void redirectTo(ServerResponse res, Header header) {
+    res.status(Status.MOVED_PERMANENTLY_301);
+    res.header(header);
+    res.send();
   }
 
   private static void registerCaches() {

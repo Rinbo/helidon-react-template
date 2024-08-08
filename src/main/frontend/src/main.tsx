@@ -8,6 +8,6 @@ import { Toaster } from "react-hot-toast";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Toaster position="bottom-right" />
-    <RouterProvider router={createBrowserRouter(routes)} />
+    <RouterProvider router={createBrowserRouter(routes, { basename: "/ui" })} />
   </React.StrictMode>,
 );

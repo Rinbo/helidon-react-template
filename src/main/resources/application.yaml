@@ -5,6 +5,8 @@ server:
     classpath:
       location: /web
   features:
+    observe:
+      enabled: true
     security:
       defaults:
         authenticate: true
@@ -28,6 +30,7 @@ db:
     url: "jdbc:postgresql://localhost:5432/hr_template"
     username: "postgres"
     password: "postgres"
+    connectionTimeout: 4000
 
 app:
   profile: "local"

@@ -216,7 +216,11 @@
     </dependency>
 
 
-    <!-- METRICS -->
+    <!-- Observability -->
+    <dependency>
+      <groupId>io.helidon.webserver.observe</groupId>
+      <artifactId>helidon-webserver-observe</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.helidon.webserver.observe</groupId>
       <artifactId>helidon-webserver-observe-metrics</artifactId>
@@ -225,6 +229,10 @@
       <groupId>io.helidon.metrics</groupId>
       <artifactId>helidon-metrics-system-meters</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.helidon.webserver.observe</groupId>
+      <artifactId>helidon-webserver-observe-health</artifactId>
     </dependency>
 
     <!-- SCHEDULING -->
