@@ -11,12 +11,12 @@
     <relativePath/>
   </parent>
 
-  <groupId>io.helidon.examples</groupId>
-  <artifactId>helidon-quickstart-se</artifactId>
+  <groupId>dev.borjessons</groupId>
+  <artifactId>helidon-react-template</artifactId>
   <version>0-SNAPSHOT</version>
 
   <properties>
-    <mainClass>io.helidon.examples.quickstart.se.Main</mainClass>
+    <mainClass>dev.borjessons.helidon.react.template.Main</mainClass>
 
     <caffine.version>3.1.8</caffine.version>
     <flyway-core.version>10.15.0</flyway-core.version>

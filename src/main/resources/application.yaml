@@ -20,9 +20,9 @@ server:
 security:
   providers:
     - atn:
-      class: io.helidon.examples.quickstart.se.security.AtnProvider
+      class: dev.borjessons.helidon.react.template.security.AtnProvider
     - atz:
-      class: io.helidon.examples.quickstart.se.security.AtzProvider
+      class: dev.borjessons.helidon.react.template.security.AtzProvider
 
 db:
   source: "jdbc"
