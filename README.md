@@ -1,4 +1,5 @@
 # helidon-react-template
+
 This repository contains a full stack web application template with a Java Helidon SE backend and React frontend.
 The intention with the template is to allow users to get going faster with new projects. The following has been set up:
 
@@ -14,23 +15,30 @@ The intention with the template is to allow users to get going faster with new p
 - TailwindCSS and daisyUI for styling
 
 ## Local development
+
 - Create a postgres database (eg. in docker), and add connection details to `applicaiton.yaml`
 - Start backend from Intellij
 - cd to `src/main/frontend` and run `npm run dev`
-- Open browser and navigate to `localhost:5173` (only in dev mode)
+- Open browser and navigate to `localhost:5173/ui` (only in dev mode)
 - When building the project either as jar or native image, frontend and backend will be served from port `8080` (default)
 
 ## Production build
+
 App can be built either as a jar or native image. However, as of the time of writing this Flyway does not work with native images.
 
 ```bash
 mvn package
-java -jar target/helidon-quickstart-se.jar
+java -jar target/helidon-react-template.jar
 ```
+
 Navigate to `localhost:8080`
 
 ## Deploy to fly.io
-Obviously you need a Fly.io account with their CLI installed in your terminal. Fly.toml and GitHub Action script will be created automatically when running below commands:
+
+Obviously you need a Fly.io account with their CLI installed in your terminal. In addition, if you want the login passcodes emailed to the user you also need to
+set up an appropriate SES service in AWS, create a policy for the app to make use of it and attach the limited permissions to a user and generate the AWS key id
+and secret key added to env variables below. Fly.toml and GitHub Action script will be created automatically when running below commands:
+
 - fly launch -r arn --name app-name
 - fly postgres create -r arn --name app-name-db
 - fly postgres attach --app app-name app-name-db
@@ -106,31 +114,32 @@ This uses the helidon-maven-plugin to perform the native compilation using your 
 Once it completes start the application using the native executable (no JVM!):
 
 ```
-./target/helidon-quickstart-se
+./target/helidon-react-template
 ```
 
 Yep, it starts fast. You can exercise the application’s endpoints as before.
 
-
 ## Building the Docker Image
 
 ```
-docker build -t helidon-quickstart-se .
+docker build -t helidon-react-template .
 ```
 
 ## Running the Docker Image
 
 ```
-docker run --rm -p 8080:8080 helidon-quickstart-se:latest
+docker run --rm -p 8080:8080 helidon-react-template:latest
 ```
 
 ## Native image troubleshooting
+
 If for whatever reason the native image is failing to be built try the following
+
 - See if more `--initialize-at-build-time` needs to added to `native-image.properties`
 - Package a jar normally: `mvn clean install`
-- Run the following: `java -agentlib:native-image-agent=config-output-dir=META-INF/native-image -jar target/helidon-quickstart-se.jar`
+- Run the following: `java -agentlib:native-image-agent=config-output-dir=META-INF/native-image -jar target/helidon-react-template.jar`
 - Copy output in the META-INF created in root to the META-INF folder in the `/resources` folder
 - Switch to GraalVM and try building again `mvn clean package -Pnative-image -DskipTests`
-- Try running it locally `./target/helidon-quickstart-se`
+- Try running it locally `./target/helidon-react-template`
 
 
