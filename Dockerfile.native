@@ -32,10 +32,8 @@ FROM scratch
 WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
-COPY --from=build /helidon/target/helidon-quickstart-se .
-#RUN ls -la /helidon
-#RUN chmod +x /helidon/target/helidon-quickstart-se
+COPY --from=build /helidon/target/helidon-react-template .
 
-ENTRYPOINT ["./helidon-quickstart-se"]
+ENTRYPOINT ["./helidon-react-template"]
 
 EXPOSE 8080

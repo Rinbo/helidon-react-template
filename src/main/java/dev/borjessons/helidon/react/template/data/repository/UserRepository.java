@@ -42,6 +42,7 @@ public class UserRepository {
     cacheInvalidatorNotifier = Contexts.globalContext().get(CacheInvalidatorNotifier.class).orElseThrow();
   }
 
+  // TODO there is some helidon DbMapper I think that can be used here.
   private static User extractUser(List<DbRow> rows) {
     DbRow firstRow = rows.getFirst();
 
